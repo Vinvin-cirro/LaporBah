@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportTrackingController;
 use App\Http\Controllers\GovernanceReportController;
+use App\Http\Controllers\OfficerReportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -90,4 +91,19 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             [GovernanceReportController::class, 'updateStatus']
         )->name('governance.reports.update-status');
     });
+
+Route::middleware(['auth', 'role:officer'])->prefix('officer')->name('officer.')->group(function () {
+    Route::get('/reports', [OfficerReportController::class, 'index'])
+        ->name('reports.index');
+    Route::get('/reports/{report}', [OfficerReportController::class, 'show'])
+        ->name('reports.show');
+    Route::patch('/reports/{report}/status', [OfficerReportController::class, 'updateStatus'])
+        ->name('reports.status');
+    Route::get(
+        '/reports/{report}/history',
+        [OfficerReportController::class, 'history']
+    )->name('reports.history');
+});
+
+
     
