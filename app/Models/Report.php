@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Report extends Model
 {
@@ -14,8 +15,11 @@ class Report extends Model
         'description',
         'latitude',
         'longitude',
-        'location_description',
+        'location_name',
         'status',
+        'area_id',
+        'tracking_code',
+        'incident_at',
     ];
 
     public function user(): BelongsTo
@@ -34,7 +38,7 @@ class Report extends Model
     {
         return $this->belongsTo(Area::class);
     }
-        public function assignments(): HasMany
+    public function assignments(): HasMany
     {
         return $this->hasMany(ReportAssignment::class);
     }
