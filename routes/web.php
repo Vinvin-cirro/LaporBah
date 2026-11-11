@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportAssignmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportTrackingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -72,3 +73,6 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::post('/reports', [ReportController::class, 'store'])
     ->name('reports.store');
+
+Route::get('/reports/track/{trackingCode}', [ReportTrackingController::class, 'show'])
+    ->name('reports.track');
