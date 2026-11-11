@@ -5,6 +5,7 @@ use App\Http\Controllers\ReportAssignmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportTrackingController;
+use App\Http\Controllers\GovernanceReportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -76,3 +77,10 @@ Route::post('/reports', [ReportController::class, 'store'])
 
 Route::get('/reports/track/{trackingCode}', [ReportTrackingController::class, 'show'])
     ->name('reports.track');
+
+Route::middleware(['auth', 'role:governance,superadmin'])
+    ->prefix('governance')
+    ->group(function () {
+        Route::get('/reports', [GovernanceReportController::class, 'index'])
+            ->name('governance.reports.index');
+    });
