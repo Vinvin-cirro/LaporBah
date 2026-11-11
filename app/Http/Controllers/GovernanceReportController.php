@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class GovernanceReportController extends Controller
 {
@@ -44,4 +47,105 @@ class GovernanceReportController extends Controller
 
         return response()->json($reports);
     }
+
+    public function show(Report $report)
+    {
+        $report->load('images');
+
+        return response()->json([
+            'id' => $report->id,
+            'tracking_code' => $report->tracking_code,
+            'category' => $report->category,
+            'description' => $report->description,
+            'location_name' => $report->location_name,
+            'latitude' => $report->latitude,
+            'longitude' => $report->longitude,
+            'status' => $report->status,
+            'incident_at' => $report->incident_at,
+            'submitted_at' => $report->created_at,
+
+            'photos' => $report->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'image_path' => $image->image_path,
+                    'image_url' => Storage::disk('public')->url(
+                        $image->image_path
+                    ),
+                ];
+            }),
+        ]);
+    }
+
+    public function updateStatus(Request $request, Report $report)
+    {
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                'in:pending,verified,investigating,resolved,rejected',
+            ],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $transitions = [
+            'pending' => ['verified', 'rejected'],
+            'verified' => ['investigating', 'rejected'],
+            'investigating' => ['resolved', 'rejected'],
+            'resolved' => [],
+            'rejected' => [],
+        ];
+
+        $result = DB::transaction(function () use ($report, $validated, $request) {
+            $currentReport = Report::whereKey($report->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $oldStatus = $currentReport->status;
+
+            $allowedTransitions = [
+                'pending' => ['verified', 'rejected'],
+                'verified' => ['investigating', 'rejected'],
+                'investigating' => ['resolved', 'rejected'],
+                'resolved' => [],
+                'rejected' => [],
+            ];
+
+            if (!in_array(
+                $validated['status'],
+                $allowedTransitions[$oldStatus] ?? [],
+                true
+            )) {
+                throw ValidationException::withMessages([
+                    'status' => 'Invalid status transition.',
+                ]);
+            }
+
+            $currentReport->update([
+                'status' => $validated['status'],
+            ]);
+
+            DB::table('report_updates')->insert([
+                'report_id' => $currentReport->id,
+                'updated_by' => $request->user()->id,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+                'note' => $validated['note'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return [
+                'report' => $currentReport,
+                'old_status' => $oldStatus,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Report status updated successfully.',
+            'report_id' => $result['report']->id,
+            'old_status' => $result['old_status'],
+            'new_status' => $result['report']->status,
+        ]);
+    }
+
+
 }

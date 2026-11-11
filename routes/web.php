@@ -83,4 +83,11 @@ Route::middleware(['auth', 'role:governance,superadmin'])
     ->group(function () {
         Route::get('/reports', [GovernanceReportController::class, 'index'])
             ->name('governance.reports.index');
+        Route::get('/reports/{report}', [GovernanceReportController::class, 'show'])
+            ->name('governance.reports.show');
+        Route::patch(
+            '/reports/{report}/status',
+            [GovernanceReportController::class, 'updateStatus']
+        )->name('governance.reports.update-status');
     });
+    
