@@ -10,6 +10,7 @@ use App\Http\Controllers\OfficerReportController;
 use App\Http\Controllers\CitizenDashboardController;
 use App\Http\Controllers\GovernanceDashboardController;
 use App\Http\Controllers\GovernanceMapController;
+use App\Http\Controllers\GovernanceOperationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -106,6 +107,10 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             ->name('governance.reports.index');
         Route::get('/reports/{report}', [GovernanceReportController::class, 'show'])
             ->name('governance.reports.show');
+        Route::get('/operations', [
+            GovernanceOperationController::class,
+            'index'
+        ])->name('governance.operations');
     });
 
 Route::middleware(['auth', 'role:officer'])->prefix('officer')->name('officer.')->group(function () {

@@ -184,8 +184,8 @@
                 <span>Manajemen Laporan</span>
             </a>
 
-            <a href="#"
-               class="sidebar-link">
+            <a href="{{ route('governance.operations') }}"
+               class="sidebar-link {{ request()->is('governance/operations*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i>
                 <span>Operasional Lapangan</span>
             </a>
