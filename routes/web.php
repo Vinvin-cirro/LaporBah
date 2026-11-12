@@ -9,6 +9,7 @@ use App\Http\Controllers\GovernanceReportController;
 use App\Http\Controllers\OfficerReportController;
 use App\Http\Controllers\CitizenDashboardController;
 use App\Http\Controllers\GovernanceDashboardController;
+use App\Http\Controllers\GovernanceMapController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,6 +39,11 @@ Route::middleware(['auth', 'role:governance'])->group(function () {
         GovernanceDashboardController::class,
         'index'
     ])->name('governance.dashboard');
+
+    Route::get('/governance/map', [
+        GovernanceMapController::class,
+        'index'
+    ])->name('governance.map');
 });
 
 // Superadmin

@@ -172,8 +172,8 @@
                 <span>Dashboard</span>
             </a>
 
-            <a href="#"
-               class="sidebar-link">
+            <a href="{{ route('governance.map') }}"
+                class="sidebar-link {{ request()->is('governance/map') ? 'active' : '' }}">
                 <i class="bi bi-map"></i>
                 <span>Peta Monitoring</span>
             </a>
