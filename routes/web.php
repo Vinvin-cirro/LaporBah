@@ -7,16 +7,20 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportTrackingController;
 use App\Http\Controllers\GovernanceReportController;
 use App\Http\Controllers\OfficerReportController;
+use App\Http\Controllers\CitizenDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('/reports/create', [ReportController::class, 'create'])
+    ->name('reports.create');
 // Citizen
 Route::middleware(['auth', 'role:citizen'])->group(function () {
-    Route::get('/citizen/dashboard', function () {
-        return 'Citizen Dashboard';
-    });
+    Route::get('/citizen/dashboard', [
+        CitizenDashboardController::class,
+        'index'
+    ])->name('citizen.dashboard');
+    
 });
 
 

@@ -12,6 +12,10 @@ use Throwable;
 
 class ReportController extends Controller
 {
+    public function create()
+    {
+        return view('reports.create');
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -74,11 +78,18 @@ class ReportController extends Controller
             throw $exception;
         }
 
-        return response()->json([
-            'message' => 'Laporan berhasil dikirim.',
-            'tracking_code' => $report->tracking_code,
-            'report_id' => $report->id,
-        ], 201);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Laporan berhasil dikirim.',
+                'tracking_code' => $report->tracking_code,
+                'report_id' => $report->id,
+            ], 201);
+        }
+
+        return redirect()
+            ->route('reports.create')
+            ->with('success', 'Laporan berhasil dikirim.')
+            ->with('tracking_code', $report->tracking_code);
     }
 
     private function generateTrackingCode(): string
