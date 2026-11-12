@@ -76,6 +76,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])
         ->name('register.process');
 });
+
+Route::middleware(['auth', 'role:superadmin'])
+    ->patch(
+        '/governance/reports/{report}/status',
+        [GovernanceReportController::class, 'updateStatus']
+    )
+    ->name('governance.reports.update-status');
+    
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 Route::get('/register', [AuthController::class, 'showRegister'])
@@ -98,10 +106,6 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             ->name('governance.reports.index');
         Route::get('/reports/{report}', [GovernanceReportController::class, 'show'])
             ->name('governance.reports.show');
-        Route::patch(
-            '/reports/{report}/status',
-            [GovernanceReportController::class, 'updateStatus']
-        )->name('governance.reports.update-status');
     });
 
 Route::middleware(['auth', 'role:officer'])->prefix('officer')->name('officer.')->group(function () {

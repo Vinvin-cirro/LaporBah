@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class GovernanceReportStatusTest extends TestCase
@@ -21,11 +20,20 @@ class GovernanceReportStatusTest extends TestCase
             'longitude' => 106.8166667,
             'location_name' => 'Jalan Sudirman',
             'status' => $status,
-            'tracking_code' => strtoupper(fake()->unique()->bothify('????????????')),
+            'tracking_code' => strtoupper(
+                fake()->unique()->bothify('????????????')
+            ),
         ]);
     }
 
-    public function test_governance_can_update_report_status(): void
+    private function createSuperadmin(): User
+    {
+        return User::factory()->create([
+            'role' => 'superadmin',
+        ]);
+    }
+
+    public function test_governance_cannot_update_report_status(): void
     {
         $governance = User::factory()->create([
             'role' => 'governance',
@@ -33,7 +41,24 @@ class GovernanceReportStatusTest extends TestCase
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($governance)->patchJson(
+        $this->actingAs($governance)->patchJson(
+            "/governance/reports/{$report->id}/status",
+            ['status' => 'verified']
+        )->assertForbidden();
+
+        $this->assertDatabaseHas('reports', [
+            'id' => $report->id,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_superadmin_can_update_report_status(): void
+    {
+        $superadmin = $this->createSuperadmin();
+
+        $report = $this->createReport();
+
+        $response = $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             [
                 'status' => 'verified',
@@ -53,31 +78,13 @@ class GovernanceReportStatusTest extends TestCase
         ]);
     }
 
-    public function test_superadmin_can_update_report_status(): void
-    {
-        $superadmin = User::factory()->create([
-            'role' => 'superadmin',
-        ]);
-
-        $report = $this->createReport();
-
-        $response = $this->actingAs($superadmin)->patchJson(
-            "/governance/reports/{$report->id}/status",
-            ['status' => 'verified']
-        );
-
-        $response->assertOk();
-    }
-
     public function test_status_update_is_recorded_in_report_updates(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport();
 
-        $this->actingAs($governance)->patchJson(
+        $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             [
                 'status' => 'verified',
@@ -87,7 +94,7 @@ class GovernanceReportStatusTest extends TestCase
 
         $this->assertDatabaseHas('report_updates', [
             'report_id' => $report->id,
-            'updated_by' => $governance->id,
+            'updated_by' => $superadmin->id,
             'old_status' => 'pending',
             'new_status' => 'verified',
             'note' => 'Bukti awal telah diperiksa.',
@@ -96,13 +103,11 @@ class GovernanceReportStatusTest extends TestCase
 
     public function test_status_can_move_from_verified_to_investigating(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport('verified');
 
-        $response = $this->actingAs($governance)->patchJson(
+        $response = $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'investigating']
         );
@@ -113,13 +118,11 @@ class GovernanceReportStatusTest extends TestCase
 
     public function test_status_can_move_from_investigating_to_resolved(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport('investigating');
 
-        $response = $this->actingAs($governance)->patchJson(
+        $response = $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'resolved']
         );
@@ -130,13 +133,11 @@ class GovernanceReportStatusTest extends TestCase
 
     public function test_pending_report_can_be_rejected(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($governance)->patchJson(
+        $response = $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             [
                 'status' => 'rejected',
@@ -150,13 +151,11 @@ class GovernanceReportStatusTest extends TestCase
 
     public function test_invalid_status_transition_is_rejected(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($governance)->patchJson(
+        $response = $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'resolved']
         );
@@ -173,50 +172,38 @@ class GovernanceReportStatusTest extends TestCase
 
     public function test_resolved_report_cannot_be_updated_again(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport('resolved');
 
-        $response = $this->actingAs($governance)->patchJson(
+        $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'pending']
-        );
-
-        $response->assertUnprocessable();
+        )->assertUnprocessable();
     }
 
     public function test_rejected_report_cannot_be_updated_again(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport('rejected');
 
-        $response = $this->actingAs($governance)->patchJson(
+        $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
-        );
-
-        $response->assertUnprocessable();
+        )->assertUnprocessable();
     }
 
     public function test_invalid_status_value_is_rejected(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($governance)->patchJson(
+        $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'completed']
-        );
-
-        $response->assertUnprocessable();
+        )->assertUnprocessable();
     }
 
     public function test_citizen_cannot_update_report_status(): void
@@ -227,15 +214,13 @@ class GovernanceReportStatusTest extends TestCase
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($citizen)->patchJson(
+        $this->actingAs($citizen)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
-        );
-
-        $response->assertForbidden();
+        )->assertForbidden();
     }
 
-    public function test_officer_cannot_update_report_status(): void
+    public function test_officer_cannot_update_report_status_through_superadmin_endpoint(): void
     {
         $officer = User::factory()->create([
             'role' => 'officer',
@@ -243,35 +228,29 @@ class GovernanceReportStatusTest extends TestCase
 
         $report = $this->createReport();
 
-        $response = $this->actingAs($officer)->patchJson(
+        $this->actingAs($officer)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
-        );
-
-        $response->assertForbidden();
+        )->assertForbidden();
     }
 
     public function test_guest_cannot_update_report_status(): void
     {
         $report = $this->createReport();
 
-        $response = $this->patchJson(
+        $this->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
-        );
-
-        $response->assertUnauthorized();
+        )->assertUnauthorized();
     }
 
     public function test_report_update_history_is_preserved(): void
     {
-        $governance = User::factory()->create([
-            'role' => 'governance',
-        ]);
+        $superadmin = $this->createSuperadmin();
 
         $report = $this->createReport();
 
-        $this->actingAs($governance)->patchJson(
+        $this->actingAs($superadmin)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
         )->assertOk();

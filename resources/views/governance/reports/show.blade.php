@@ -148,6 +148,178 @@
             </div>
         </div>
 
+        {{-- Flash Message --}}
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Assignment Section --}}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Penugasan Petugas</h5>
+            </div>
+
+            <div class="card-body">
+                <h6 class="text-muted">Petugas Aktif</h6>
+
+                @if ($report->activeAssignment)
+                    <div class="alert alert-info">
+                        <strong>{{ $report->activeAssignment->officer->name }}</strong>
+                        <br>
+                        <small>{{ $report->activeAssignment->officer->email }}</small>
+                        <br>
+                        <span class="badge bg-success mt-2">Sedang Bertugas</span>
+                    </div>
+                @elseif (in_array($report->status, ['resolved', 'rejected']))
+                    <div class="alert alert-secondary">
+                        <strong>Penugasan telah berakhir.</strong>
+                        <br>
+                        <small>
+                            Laporan ini sudah
+                            {{ $report->status === 'resolved' ? 'diselesaikan' : 'ditolak' }}.
+                        </small>
+                    </div>
+                @else
+                    <div class="alert alert-warning">
+                        Belum ada petugas yang ditugaskan.
+                    </div>
+                @endif
+
+                <hr>
+
+                <h6 class="mb-3">
+                    {{ $report->activeAssignment ? 'Ganti Petugas' : 'Tugaskan Petugas' }}
+                </h6>
+
+               @if (in_array($report->status, ['verified', 'investigating']))
+                    @if ($officers->isNotEmpty())
+                        <form
+                            action="{{ route('governance.reports.assign', $report->id) }}"
+                            method="POST"
+                        >
+                            @csrf
+
+                            <div class="mb-3">
+                                <label for="officer_id" class="form-label">
+                                    Pilih Petugas
+                                </label>
+
+                                <select
+                                    name="officer_id"
+                                    id="officer_id"
+                                    class="form-select"
+                                    required
+                                >
+                                    <option value="">-- Pilih Petugas --</option>
+
+                                    @foreach ($officers as $officer)
+                                        <option value="{{ $officer->id }}">
+                                            {{ $officer->name }} ({{ $officer->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="note" class="form-label">
+                                    Catatan Penugasan (Opsional)
+                                </label>
+
+                                <textarea
+                                    name="note"
+                                    id="note"
+                                    class="form-control"
+                                    rows="3"
+                                    maxlength="1000"
+                                    placeholder="Tambahkan instruksi untuk petugas..."
+                                >{{ old('note') }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                {{ $report->activeAssignment ? 'Ganti Petugas' : 'Tugaskan Petugas' }}
+                            </button>
+                        </form>
+                    @else
+                        <div class="alert alert-warning mb-0">
+                            Belum ada akun dengan role Officer.
+                        </div>
+                    @endif
+                @else
+                    <div class="alert alert-secondary mb-0">
+                        Laporan sudah selesai atau ditolak. Penugasan petugas tidak dapat dilakukan.
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Assignment History --}}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Riwayat Penugasan</h5>
+            </div>
+
+            <div class="card-body">
+                @forelse ($report->assignments->sortByDesc('assigned_at') as $assignment)
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <strong>
+                                {{ $assignment->officer->name }}
+                            </strong>
+
+                            @if ($assignment->ended_at)
+                                <span class="badge bg-secondary">Selesai</span>
+                            @else
+                                <span class="badge bg-success">Aktif</span>
+                            @endif
+                        </div>
+
+                        <small class="text-muted">
+                            Ditugaskan oleh:
+                            {{ $assignment->assigner?->name ?? 'Tidak diketahui' }}
+                        </small>
+
+                        <div class="mt-2">
+                            <small>
+                                Waktu penugasan:
+                                {{ $assignment->assigned_at?->format('d/m/Y H:i') ?? '-' }}
+                            </small>
+                        </div>
+
+                        @if ($assignment->ended_at)
+                            <div>
+                                <small>
+                                    Waktu berakhir:
+                                    {{ $assignment->ended_at->format('d/m/Y H:i') }}
+                                </small>
+                            </div>
+                        @endif
+
+                        @if ($assignment->note)
+                            <p class="mb-0 mt-2">
+                                <small>Catatan: {{ $assignment->note }}</small>
+                            </p>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-muted mb-0">
+                        Belum ada riwayat penugasan.
+                    </p>
+                @endforelse
+            </div>
+        </div>
+
         {{-- Riwayat Status --}}
         <div class="col-12">
             <div class="card border-0 shadow-sm">

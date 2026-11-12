@@ -25,7 +25,11 @@ class ReportAssignmentController extends Controller
                 'max:1000',
             ],
         ]);
-
+        if (!in_array($report->status, ['verified', 'investigating'])) {
+            return back()->withErrors([
+                'assignment' => 'Laporan sudah selesai atau ditolak. Petugas tidak dapat ditugaskan.',
+            ]);
+        }
         $assignmentService->assign(
             reportId: $report->id,
             officerId: (int) $validated['officer_id'],

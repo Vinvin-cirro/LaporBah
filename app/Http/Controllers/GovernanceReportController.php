@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -57,10 +58,24 @@ class GovernanceReportController extends Controller
 
     public function show(Request $request, Report $report)
     {
-        $report->load(['images', 'updates.updater']);
+        $report->load([
+            'images',
+            'updates.updater',
+            'activeAssignment.officer',
+            'assignments.officer',
+            'assignments.assigner',
+        ]);
+
+        $officers = User::query()
+            ->where('role', 'officer')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         if (!$request->expectsJson()) {
-            return view('governance.reports.show', compact('report'));
+            return view('governance.reports.show', compact(
+                'report',
+                'officers'
+            ));
         }
 
         return response()->json([
