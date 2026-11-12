@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportTrackingController;
 use App\Http\Controllers\GovernanceReportController;
 use App\Http\Controllers\OfficerReportController;
 use App\Http\Controllers\CitizenDashboardController;
+use App\Http\Controllers\GovernanceDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,9 +34,10 @@ Route::middleware(['auth', 'role:officer'])->group(function () {
 
 // Governance
 Route::middleware(['auth', 'role:governance'])->group(function () {
-    Route::get('/governance/dashboard', function () {
-        return 'Governance Dashboard';
-    });
+    Route::get('/governance/dashboard', [
+        GovernanceDashboardController::class,
+        'index'
+    ])->name('governance.dashboard');
 });
 
 // Superadmin
