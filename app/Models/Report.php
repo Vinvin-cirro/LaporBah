@@ -21,7 +21,12 @@ class Report extends Model
         'tracking_code',
         'incident_at',
     ];
-
+    protected function casts(): array
+    {
+        return [
+            'incident_at' => 'datetime',
+        ];
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

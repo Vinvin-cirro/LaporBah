@@ -45,12 +45,23 @@ class GovernanceReportController extends Controller
             ->latest()
             ->paginate($validated['per_page'] ?? 15);
 
-        return response()->json($reports);
+        if ($request->expectsJson()) {
+            return response()->json($reports);
+        }
+
+        return view('governance.reports.index', [
+            'reports' => $reports,
+            'filters' => $validated,
+        ]);
     }
 
-    public function show(Report $report)
+    public function show(Request $request, Report $report)
     {
-        $report->load('images');
+        $report->load(['images', 'updates.updater']);
+
+        if (!$request->expectsJson()) {
+            return view('governance.reports.show', compact('report'));
+        }
 
         return response()->json([
             'id' => $report->id,
@@ -75,7 +86,6 @@ class GovernanceReportController extends Controller
             }),
         ]);
     }
-
     public function updateStatus(Request $request, Report $report)
     {
         $validated = $request->validate([
