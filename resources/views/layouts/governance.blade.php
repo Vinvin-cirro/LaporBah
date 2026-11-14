@@ -190,8 +190,8 @@
                 <span>Operasional Lapangan</span>
             </a>
 
-            <a href="#"
-               class="sidebar-link">
+            <a href="{{ route('governance.statistics') }}"
+               class="sidebar-link {{ request()->is('governance/statistics*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart"></i>
                 <span>Statistik</span>
             </a>

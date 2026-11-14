@@ -43,13 +43,14 @@
             font-size: 11px;
             margin-top: 2px;
         }
+
         .brand-logo {
             height: 64px;
             width: auto;
             object-fit: contain;
             margin-right: 24px;
             filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.25))
-            drop-shadow(0 0 7px rgba(255, 255, 255, 0.05));
+                drop-shadow(0 0 7px rgba(255, 255, 255, 0.05));
         }
 
         .nav-link {
@@ -175,8 +176,6 @@
             #securityMap {
                 height: 320px;
             }
-        
-        
         }
     </style>
 </head>
@@ -190,6 +189,7 @@
             alt="LaporBah!"
             class="brand-logo"
         >
+
         <a href="/" class="brand">
             <h1>LaporBah!</h1>
             <p>Untuk warga Medan</p>
@@ -206,12 +206,24 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <div class="navbar-nav mx-auto gap-lg-4">
-                <a class="nav-link active text-warning" href="{{ route('citizen.dashboard') }}">
+                <a
+                    class="nav-link active text-warning"
+                    href="{{ route('citizen.dashboard') }}"
+                >
                     Beranda
                 </a>
-                <a class="nav-link" href="#securityMap">Peta Keamanan</a>
-                <a class="nav-link" href="#">Navigasi Aman</a>
-                <a class="nav-link" href="#">Statistik</a>
+
+                <a class="nav-link" href="#securityMap">
+                    Peta Keamanan
+                </a>
+
+                <a class="nav-link" href="#">
+                    Navigasi Aman
+                </a>
+
+                <a class="nav-link" href="#">
+                    Statistik
+                </a>
             </div>
 
             <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
@@ -240,9 +252,10 @@
 
     <div class="mb-4">
         <h1 class="page-title">Beranda</h1>
+
         <p class="muted">
             Selamat datang, {{ auth()->user()->name }}.
-            Bantu Bekasi lebih aman.
+            Bantu Medan lebih aman.
         </p>
     </div>
 
@@ -311,6 +324,7 @@
         <div class="col-lg-4">
             <div class="updates-card">
                 <h4 class="fw-bold mb-1">Pembaruan sekitar</h4>
+
                 <p class="muted small">
                     Informasi penanganan wilayah
                 </p>
@@ -350,6 +364,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h4 class="fw-bold mb-1">Laporan Saya</h4>
+
                     <p class="text-secondary mb-0">
                         Pantau laporan yang pernah kamu kirim.
                     </p>
@@ -431,6 +446,7 @@
                             <tr>
                                 <td colspan="6" class="text-center py-5">
                                     <h6 class="fw-bold">Belum ada laporan</h6>
+
                                     <p class="text-secondary mb-0">
                                         Laporan yang kamu kirim akan muncul di sini.
                                     </p>
@@ -454,6 +470,7 @@
 
         <div>
             <h4 class="fw-bold">Ada masalah di sekitarmu?</h4>
+
             <p class="mb-0">
                 Laporkan dengan aman. Jangan sertakan identitas korban
                 atau data pribadi orang lain.
@@ -473,7 +490,8 @@
                 justify-content-between gap-3">
 
         <div>
-            <strong>LaporBah! · Bersama untuk Bekasi</strong>
+            <strong>LaporBah! · Bersama untuk Medan</strong>
+
             <p class="muted small mb-0">
                 Bukan layanan darurat. Utamakan keselamatan diri.
             </p>
@@ -493,32 +511,38 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    const map = L.map('securityMap').setView([-6.2383, 106.9756], 12);
+    // Pusat peta Kota Medan
+    const map = L.map('securityMap').setView([3.5952, 98.6722], 12);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Data laporan dari Laravel Controller
     const reports = @json($mapReports);
 
-    const bekasiBounds = L.latLngBounds(
-        [-6.45, 106.85],
-        [-6.05, 107.20]
+    // Perkiraan batas tampilan wilayah Medan
+    const medanBounds = L.latLngBounds(
+        [3.43, 98.52],
+        [3.78, 98.82]
     );
 
     reports.forEach(report => {
         const lat = Number(report.latitude);
         const lng = Number(report.longitude);
 
+        // Abaikan koordinat yang tidak valid atau di luar Medan
         if (
             !Number.isFinite(lat) ||
             !Number.isFinite(lng) ||
-            !bekasiBounds.contains([lat, lng])
+            !medanBounds.contains([lat, lng])
         ) {
             return;
         }
 
-        const color = report.category === 'begal' ? '#dc3545' : '#f0ad00';
+        const color = report.category === 'begal'
+            ? '#dc3545'
+            : '#f0ad00';
 
         L.circleMarker([lat, lng], {
             radius: 8,

@@ -11,6 +11,7 @@ use App\Http\Controllers\CitizenDashboardController;
 use App\Http\Controllers\GovernanceDashboardController;
 use App\Http\Controllers\GovernanceMapController;
 use App\Http\Controllers\GovernanceOperationController;
+use App\Http\Controllers\GovernanceStatisticsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -111,6 +112,10 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             GovernanceOperationController::class,
             'index'
         ])->name('governance.operations');
+        Route::get('/statistics', [
+            GovernanceStatisticsController::class,
+            'index'
+        ])->name('governance.statistics');
     });
 
 Route::middleware(['auth', 'role:officer'])->prefix('officer')->name('officer.')->group(function () {
