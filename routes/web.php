@@ -79,7 +79,7 @@ Route::middleware('guest')->group(function () {
         ->name('register.process');
 });
 
-Route::middleware(['auth', 'role:superadmin'])
+Route::middleware(['auth', 'role:governance,superadmin'])
     ->patch(
         '/governance/reports/{report}/status',
         [GovernanceReportController::class, 'updateStatus']

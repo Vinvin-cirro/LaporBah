@@ -43,6 +43,11 @@ class Report extends Model
     {
         return $this->belongsTo(Area::class);
     }
+
+    public function duplicateOf(): BelongsTo
+    {
+        return $this->belongsTo(Report::class, 'duplicate_of_report_id');
+    }
     public function assignments(): HasMany
     {
         return $this->hasMany(ReportAssignment::class);

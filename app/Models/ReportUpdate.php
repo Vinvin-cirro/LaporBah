@@ -12,6 +12,7 @@ class ReportUpdate extends Model
         'updated_by',
         'old_status',
         'new_status',
+        'action',
         'note',
     ];
 

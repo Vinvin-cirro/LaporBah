@@ -14,23 +14,28 @@ class ReportAssignmentService
         int $reportId,
         int $officerId,
         ?int $assignedBy = null,
-        ?string $note = null
+        ?string $note = null,
+        ?string $institutionName = null,
+        ?string $teamName = null,
+        ?string $priority = null,
+        ?string $dueAt = null
     ): ReportAssignment {
 
         return DB::transaction(function () use (
             $reportId,
             $officerId,
             $assignedBy,
-            $note
+            $note,
+            $institutionName,
+            $teamName,
+            $priority,
+            $dueAt
         ) {
 
-            // Lock laporan agar assignment tidak berjalan
-            // bersamaan untuk laporan yang sama.
             $report = Report::query()
                 ->lockForUpdate()
                 ->findOrFail($reportId);
 
-            // Pastikan user yang dipilih adalah petugas.
             $officer = User::query()
                 ->where('id', $officerId)
                 ->where('role', 'officer')
@@ -42,20 +47,33 @@ class ReportAssignmentService
                 ]);
             }
 
-            // Cari penugasan aktif sebelumnya.
             $activeAssignment = ReportAssignment::query()
                 ->where('report_id', $report->id)
                 ->whereNull('ended_at')
                 ->lockForUpdate()
                 ->first();
 
-            // Jika petugasnya sama, tidak perlu membuat
-            // penugasan duplikat.
+            // Data tambahan penugasan.
+            $assignmentData = array_filter([
+                'assigned_by' => $assignedBy,
+                'note' => $note,
+                'institution_name' => $institutionName,
+                'team_name' => $teamName,
+                'priority' => $priority,
+                'due_at' => $dueAt,
+            ], fn ($value) => $value !== null);
+
+            // Jika petugas sama, perbarui detail tanpa
+            // membuat riwayat penugasan duplikat.
             if (
                 $activeAssignment &&
                 $activeAssignment->officer_id === $officer->id
             ) {
-                return $activeAssignment;
+                if (!empty($assignmentData)) {
+                    $activeAssignment->update($assignmentData);
+                }
+
+                return $activeAssignment->fresh();
             }
 
             // Akhiri penugasan sebelumnya.
@@ -66,14 +84,15 @@ class ReportAssignmentService
             }
 
             // Buat penugasan baru.
-            return ReportAssignment::create([
-                'report_id' => $report->id,
-                'officer_id' => $officer->id,
-                'assigned_by' => $assignedBy,
-                'assigned_at' => now(),
-                'ended_at' => null,
-                'note' => $note,
-            ]);
+            return ReportAssignment::create(array_merge(
+                [
+                    'report_id' => $report->id,
+                    'officer_id' => $officer->id,
+                    'assigned_at' => now(),
+                    'ended_at' => null,
+                ],
+                $assignmentData
+            ));
         });
     }
 }

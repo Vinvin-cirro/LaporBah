@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\ReportUpdate;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class GovernanceReportController extends Controller
@@ -22,21 +23,13 @@ class GovernanceReportController extends Controller
 
         $reports = Report::query()
             ->select([
-                'id',
-                'tracking_code',
-                'category',
-                'location_name',
-                'latitude',
-                'longitude',
-                'status',
-                'created_at',
+                'id', 'tracking_code', 'category', 'location_name',
+                'latitude', 'longitude', 'status', 'created_at',
             ])
-            ->when($validated['category'] ?? null, function ($query, $category) {
-                $query->where('category', $category);
-            })
-            ->when($validated['status'] ?? null, function ($query, $status) {
-                $query->where('status', $status);
-            })
+            ->when($validated['category'] ?? null, fn ($query, $category) =>
+                $query->where('category', $category))
+            ->when($validated['status'] ?? null, fn ($query, $status) =>
+                $query->where('status', $status))
             ->when($validated['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('tracking_code', 'like', "%{$search}%")
@@ -44,7 +37,8 @@ class GovernanceReportController extends Controller
                 });
             })
             ->latest()
-            ->paginate($validated['per_page'] ?? 15);
+            ->paginate($validated['per_page'] ?? 15)
+            ->withQueryString();
 
         if ($request->expectsJson()) {
             return response()->json($reports);
@@ -64,6 +58,7 @@ class GovernanceReportController extends Controller
             'activeAssignment.officer',
             'assignments.officer',
             'assignments.assigner',
+            'duplicateOf',
         ]);
 
         $officers = User::query()
@@ -71,10 +66,39 @@ class GovernanceReportController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
+        $similarReports = collect();
+        if ($report->latitude !== null && $report->longitude !== null) {
+            // Ambil kandidat dalam radius koordinat kasar, lalu hitung jarak sebenarnya.
+            $latitude = (float) $report->latitude;
+            $longitude = (float) $report->longitude;
+            $candidates = Report::query()
+                ->where('id', '!=', $report->id)
+                ->whereBetween('latitude', [$latitude - 0.02, $latitude + 0.02])
+                ->whereBetween('longitude', [$longitude - 0.02, $longitude + 0.02])
+                ->latest()
+                ->limit(100)
+                ->get(['id', 'tracking_code', 'category', 'location_name', 'latitude', 'longitude', 'status', 'created_at']);
+
+            $similarReports = $candidates->map(function ($candidate) use ($latitude, $longitude) {
+                $lat2 = (float) $candidate->latitude;
+                $lon2 = (float) $candidate->longitude;
+                $latDelta = deg2rad($lat2 - $latitude);
+                $lonDelta = deg2rad($lon2 - $longitude);
+                $a = sin($latDelta / 2) ** 2
+                    + cos(deg2rad($latitude)) * cos(deg2rad($lat2))
+                    * sin($lonDelta / 2) ** 2;
+                $candidate->distance_meters = 6371000 * 2 * atan2(sqrt($a), sqrt(1 - $a));
+                return $candidate;
+            })
+                ->filter(fn ($candidate) => $candidate->distance_meters <= 2000)
+                ->sortBy('distance_meters')
+                ->take(5)
+                ->values();
+        }
+
         if (!$request->expectsJson()) {
             return view('governance.reports.show', compact(
-                'report',
-                'officers'
+                'report', 'officers', 'similarReports'
             ));
         }
 
@@ -89,42 +113,53 @@ class GovernanceReportController extends Controller
             'status' => $report->status,
             'incident_at' => $report->incident_at,
             'submitted_at' => $report->created_at,
-
-            'photos' => $report->images->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'image_path' => $image->image_path,
-                    'image_url' => Storage::disk('public')->url(
-                        $image->image_path
-                    ),
-                ];
-            }),
+            'duplicate_of_report_id' => $report->duplicate_of_report_id,
+            'photos' => $report->images->map(fn ($image) => [
+                'id' => $image->id,
+                'image_path' => $image->image_path,
+                'image_url' => Storage::disk('public')->url($image->image_path),
+            ]),
         ]);
     }
+
     public function updateStatus(Request $request, Report $report)
     {
         $validated = $request->validate([
-            'status' => [
-                'required',
-                'in:pending,verified,investigating,resolved,rejected',
-            ],
-            'note' => ['nullable', 'string', 'max:1000'],
+            'action' => ['nullable', 'in:verify,request_info,mark_duplicate,reject,status_change'],
+            'status' => ['required_without:action', 'required_if:action,status_change', 'nullable', 'in:pending,verified,investigating,resolved,rejected'],
+            'note' => ['nullable', 'required_if:action,verify,request_info,mark_duplicate,reject', 'string', 'max:1000'],
+            'duplicate_of_report_id' => ['required_if:action,mark_duplicate', 'nullable', 'integer', 'exists:reports,id'],
         ]);
 
-        $transitions = [
-            'pending' => ['verified', 'rejected'],
-            'verified' => ['investigating', 'rejected'],
-            'investigating' => ['resolved', 'rejected'],
-            'resolved' => [],
-            'rejected' => [],
-        ];
-
-        $result = DB::transaction(function () use ($report, $validated, $request) {
-            $currentReport = Report::whereKey($report->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
+        $action = $validated['action'] ?? 'status_change';
+        $result = DB::transaction(function () use ($report, $validated, $action, $request) {
+            $currentReport = Report::query()->whereKey($report->id)->lockForUpdate()->firstOrFail();
             $oldStatus = $currentReport->status;
+            $newStatus = $oldStatus;
+
+            if ($action === 'verify') {
+                $newStatus = 'verified';
+            } elseif ($action === 'reject' || $action === 'mark_duplicate') {
+                $newStatus = 'rejected';
+            } elseif ($action === 'status_change') {
+                $newStatus = $validated['status'];
+            }
+
+            if ($action === 'request_info' && $oldStatus !== 'pending') {
+                throw ValidationException::withMessages([
+                    'action' => 'Permintaan informasi tambahan hanya dapat dikirim saat laporan menunggu verifikasi.',
+                ]);
+            }
+
+            if ($action === 'mark_duplicate') {
+                $duplicateId = (int) $validated['duplicate_of_report_id'];
+                if ($duplicateId === $currentReport->id) {
+                    throw ValidationException::withMessages([
+                        'duplicate_of_report_id' => 'Laporan tidak dapat ditandai sebagai duplikat dirinya sendiri.',
+                    ]);
+                }
+                $currentReport->duplicate_of_report_id = $duplicateId;
+            }
 
             $allowedTransitions = [
                 'pending' => ['verified', 'rejected'],
@@ -134,43 +169,46 @@ class GovernanceReportController extends Controller
                 'rejected' => [],
             ];
 
-            if (!in_array(
-                $validated['status'],
-                $allowedTransitions[$oldStatus] ?? [],
-                true
-            )) {
+            if ($newStatus !== $oldStatus && !in_array($newStatus, $allowedTransitions[$oldStatus] ?? [], true)) {
                 throw ValidationException::withMessages([
-                    'status' => 'Invalid status transition.',
+                    'status' => 'Perubahan status tidak diizinkan dari status saat ini.',
                 ]);
             }
 
-            $currentReport->update([
-                'status' => $validated['status'],
-            ]);
+            $currentReport->status = $newStatus;
+            $currentReport->save();
 
-            DB::table('report_updates')->insert([
+            ReportUpdate::create([
                 'report_id' => $currentReport->id,
                 'updated_by' => $request->user()->id,
                 'old_status' => $oldStatus,
-                'new_status' => $validated['status'],
-                'note' => $validated['note'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'new_status' => $newStatus,
+                'action' => $action,
+                'note' => $validated['note'],
             ]);
 
-            return [
-                'report' => $currentReport,
-                'old_status' => $oldStatus,
-            ];
+            return ['old_status' => $oldStatus, 'new_status' => $newStatus];
         });
 
+        $message = match ($action) {
+            'verify' => 'Laporan berhasil diverifikasi.',
+            'request_info' => 'Permintaan informasi tambahan berhasil dicatat.',
+            'mark_duplicate' => 'Laporan berhasil ditandai sebagai duplikat.',
+            'reject' => 'Laporan berhasil ditolak.',
+            default => 'Status laporan berhasil diperbarui.',
+        };
+
+        if (!$request->expectsJson()) {
+            return redirect()->route('governance.reports.show', $report)
+                ->with('success', $message);
+        }
+
         return response()->json([
-            'message' => 'Report status updated successfully.',
-            'report_id' => $result['report']->id,
+            'message' => $message,
+            'report_id' => $report->id,
             'old_status' => $result['old_status'],
-            'new_status' => $result['report']->status,
+            'new_status' => $result['new_status'],
+            'action' => $action,
         ]);
     }
-
-
 }

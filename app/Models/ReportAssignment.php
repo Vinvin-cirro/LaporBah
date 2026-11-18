@@ -11,7 +11,11 @@ class ReportAssignment extends Model
         'report_id',
         'officer_id',
         'assigned_by',
+        'institution_name',
+        'team_name',
+        'priority',
         'assigned_at',
+        'due_at',
         'ended_at',
         'note',
     ];
@@ -20,6 +24,7 @@ class ReportAssignment extends Model
     {
         return [
             'assigned_at' => 'datetime',
+            'due_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
     }

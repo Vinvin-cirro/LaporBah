@@ -1,0 +1,18 @@
+PATCH HALAMAN PENUGASAN LAPORBAH!
+
+CARA MEMASANG:
+1. Extract folder LaporBah_detail_patch.
+2. Salin seluruh isinya ke root project Laravel (folder yang berisi artisan).
+3. Izinkan file yang sama ditimpa.
+4. Jalankan: php artisan optimize:clear
+5. Jalankan: php artisan route:list --name=governance.reports.assign
+6. Buka detail laporan berstatus verified atau investigating, lalu klik Buat penugasan / Perbarui penugasan.
+
+GET /governance/reports/{report}/assignments/create menampilkan form.
+POST /governance/reports/{report}/assignments menyimpan penugasan melalui ReportAssignmentService.
+Setelah berhasil, pengguna diarahkan kembali ke detail laporan.
+
+Catatan:
+- Tidak ada migration baru.
+- institution_name tetap berupa teks sesuai struktur database saat ini.
+- Notifikasi ke petugas tidak ditambahkan.

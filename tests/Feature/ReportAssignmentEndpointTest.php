@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Report;
-use App\Models\ReportAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,8 +27,20 @@ class ReportAssignmentEndpointTest extends TestCase
             'description' => 'Laporan pengujian',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
-            'status' => 'pending',
+            'status' => 'verified',
         ]);
+    }
+
+    private function assignmentData(int $officerId): array
+    {
+        return [
+            'officer_id' => $officerId,
+            'institution_name' => 'Dinas Perhubungan',
+            'team_name' => 'Tim Lapangan Medan',
+            'priority' => 'normal',
+            'due_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'note' => 'Lakukan pemeriksaan lokasi.',
+        ];
     }
 
     public function test_governance_can_assign_officer(): void
@@ -39,9 +50,10 @@ class ReportAssignmentEndpointTest extends TestCase
         $report = $this->createReport();
 
         $response = $this->actingAs($governance)
-            ->post(route('governance.reports.assign', $report), [
-                'officer_id' => $officer->id,
-            ]);
+            ->post(
+                route('governance.reports.assign', $report),
+                $this->assignmentData($officer->id)
+            );
 
         $response->assertRedirect();
 
@@ -49,6 +61,9 @@ class ReportAssignmentEndpointTest extends TestCase
             'report_id' => $report->id,
             'officer_id' => $officer->id,
             'assigned_by' => $governance->id,
+            'institution_name' => 'Dinas Perhubungan',
+            'team_name' => 'Tim Lapangan Medan',
+            'priority' => 'normal',
             'ended_at' => null,
         ]);
     }
@@ -60,15 +75,17 @@ class ReportAssignmentEndpointTest extends TestCase
         $report = $this->createReport();
 
         $response = $this->actingAs($admin)
-            ->post(route('governance.reports.assign', $report), [
-                'officer_id' => $officer->id,
-            ]);
+            ->post(
+                route('governance.reports.assign', $report),
+                $this->assignmentData($officer->id)
+            );
 
         $response->assertRedirect();
 
         $this->assertDatabaseHas('report_assignments', [
             'report_id' => $report->id,
             'officer_id' => $officer->id,
+            'institution_name' => 'Dinas Perhubungan',
         ]);
     }
 
@@ -79,9 +96,10 @@ class ReportAssignmentEndpointTest extends TestCase
         $report = $this->createReport();
 
         $this->actingAs($citizen)
-            ->post(route('governance.reports.assign', $report), [
-                'officer_id' => $officer->id,
-            ])
+            ->post(
+                route('governance.reports.assign', $report),
+                $this->assignmentData($officer->id)
+            )
             ->assertForbidden();
 
         $this->assertDatabaseCount('report_assignments', 0);
@@ -94,15 +112,15 @@ class ReportAssignmentEndpointTest extends TestCase
         $report = $this->createReport();
 
         $this->actingAs($officerA)
-            ->post(route('governance.reports.assign', $report), [
-                'officer_id' => $officerB->id,
-            ])
+            ->post(
+                route('governance.reports.assign', $report),
+                $this->assignmentData($officerB->id)
+            )
             ->assertForbidden();
 
         $this->assertDatabaseCount('report_assignments', 0);
     }
 
-    
     public function test_guest_cannot_assign_officer(): void
     {
         $officer = $this->createUser('officer');
@@ -110,9 +128,7 @@ class ReportAssignmentEndpointTest extends TestCase
 
         $response = $this->postJson(
             route('governance.reports.assign', $report),
-            [
-                'officer_id' => $officer->id,
-            ]
+            $this->assignmentData($officer->id)
         );
 
         $response->assertUnauthorized();
@@ -127,9 +143,10 @@ class ReportAssignmentEndpointTest extends TestCase
         $report = $this->createReport();
 
         $this->actingAs($governance)
-            ->post(route('governance.reports.assign', $report), [
-                'officer_id' => $citizen->id,
-            ])
+            ->post(
+                route('governance.reports.assign', $report),
+                $this->assignmentData($citizen->id)
+            )
             ->assertSessionHasErrors('officer_id');
 
         $this->assertDatabaseCount('report_assignments', 0);
