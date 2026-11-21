@@ -25,7 +25,7 @@ use App\Http\Controllers\ReportAssignmentController;
 Route::get('/', [
     CitizenDashboardController::class,
     'index'
-])->name('citizen.dashboard');
+])->name('index');
 
 // Create Report - Guest Access
 Route::get('/reports/create', [

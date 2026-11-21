@@ -15,6 +15,21 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
+    <style>
+        .btn-darkblue {
+            background: #020d32;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-weight: 600;
+        }  
+        .btn-batal {
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-weight: 600;
+        } 
+    </style>
 </head>
 
 <body class="bg-light">
@@ -274,12 +289,12 @@
         <div class="d-flex justify-content-end gap-2 mb-5">
             <a
                 href="{{ auth()->check() ? route('citizen.dashboard') : url('/') }}"
-                class="btn btn-outline-secondary"
+                class="btn btn-outline-secondary btn-batal"
             >
                 Batal
             </a>
 
-            <button type="submit" class="btn btn-primary px-4">
+            <button type="submit" class="btn btn-darkblue px-4">
                 Kirim Laporan
             </button>
         </div>

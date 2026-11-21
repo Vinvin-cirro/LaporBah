@@ -30,6 +30,7 @@
 
         .brand {
             text-decoration: none;
+            margin-top: 10px;
         }
 
         .brand h1 {
@@ -72,7 +73,12 @@
             font-size: 36px;
             font-weight: 700;
         }
-
+        .text-kuning{
+            color: #ffe45c !important;
+        }
+        .btn-kuning{
+            background: #ffe45c;
+        }
         .muted {
             color: #586987;
         }
@@ -208,8 +214,8 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <div class="navbar-nav mx-auto gap-lg-4">
                 <a
-                    class="nav-link active text-warning"
-                    href="{{ route('citizen.dashboard') }}"
+                    class="nav-link active text-kuning"
+                    href="{{ route('index') }}"
                 >
                     Beranda
                 </a>
@@ -250,7 +256,7 @@
                     </form>
                 @else
                     {{-- Jika belum login --}}
-                    <a href="{{ route('login') }}" class="btn btn-md text-darkblue btn-warning">
+                    <a href="{{ route('login') }}" class="btn btn-md text-darkblue btn-kuning">
                         Login
                     </a>
                 @endauth
