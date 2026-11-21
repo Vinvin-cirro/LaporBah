@@ -204,6 +204,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        
         <div class="collapse navbar-collapse" id="mainNavbar">
             <div class="navbar-nav mx-auto gap-lg-4">
                 <a
@@ -227,22 +228,33 @@
             </div>
 
             <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+
+                {{-- Tombol Lapor tetap tersedia untuk semua --}}
                 <a href="{{ route('reports.create') }}" class="btn btn-outline-light">
                     + Lapor
                 </a>
 
-                <span class="text-white">♧</span>
+                @auth
+                    {{-- Jika sudah login --}}
+                    <span class="text-white">♧</span>
 
-                <span class="text-white">
-                    {{ auth()->user()->name }}
-                </span>
+                    <span class="text-white">
+                        {{ auth()->user()->name }}
+                    </span>
 
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-sm btn-outline-light">
-                        Keluar
-                    </button>
-                </form>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button class="btn btn-sm btn-outline-light">
+                            Keluar
+                        </button>
+                    </form>
+                @else
+                    {{-- Jika belum login --}}
+                    <a href="{{ route('login') }}" class="btn btn-md text-darkblue btn-warning">
+                        Login
+                    </a>
+                @endauth
+
             </div>
         </div>
     </div>
@@ -254,7 +266,12 @@
         <h1 class="page-title">Beranda</h1>
 
         <p class="muted">
-            Selamat datang, {{ auth()->user()->name }}.
+            @auth
+                Selamat datang, {{ auth()->user()->name }}.
+            @else
+                Selamat datang.
+            @endauth
+
             Bantu Medan lebih aman.
         </p>
     </div>
@@ -387,80 +404,97 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        @forelse ($myReports as $report)
+                        @auth
+                            @forelse ($myReports as $report)
+                                <tr>
+                                    <td class="fw-semibold">
+                                        {{ $report->tracking_code }}
+                                    </td>
+
+                                    <td>
+                                        {{ $report->category === 'begal'
+                                            ? 'Begal / CURAS'
+                                            : 'Area Gelap' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $report->location_name ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $report->created_at->format('d M Y') }}
+                                    </td>
+
+                                    <td>
+                                        @php
+                                            $statusColors = [
+                                                'pending' => 'warning',
+                                                'verified' => 'info',
+                                                'investigating' => 'primary',
+                                                'resolved' => 'success',
+                                                'rejected' => 'danger',
+                                            ];
+
+                                            $statusLabels = [
+                                                'pending' => 'Menunggu',
+                                                'verified' => 'Terverifikasi',
+                                                'investigating' => 'Diproses',
+                                                'resolved' => 'Selesai',
+                                                'rejected' => 'Ditolak',
+                                            ];
+                                        @endphp
+
+                                        <span class="badge text-bg-{{ $statusColors[$report->status] ?? 'secondary' }}">
+                                            {{ $statusLabels[$report->status] ?? $report->status }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a
+                                            href="{{ url('/reports/track/' . $report->tracking_code) }}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <h6 class="fw-bold">Belum ada laporan</h6>
+
+                                        <p class="text-secondary mb-0">
+                                            Laporan yang kamu kirim akan muncul di sini.
+                                        </p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        @else
                             <tr>
-                                <td class="fw-semibold">
-                                    {{ $report->tracking_code }}
-                                </td>
+                                <td colspan="6" class="text-center py-5">
+                                    <h6 class="fw-bold">Login untuk melihat laporan</h6>
 
-                                <td>
-                                    {{ $report->category === 'begal'
-                                        ? 'Begal / CURAS'
-                                        : 'Area Gelap' }}
-                                </td>
+                                    <p class="text-secondary mb-3">
+                                        Masuk ke akunmu untuk melihat daftar laporan yang pernah kamu kirim.
+                                    </p>
 
-                                <td>
-                                    {{ $report->location_name ?? '-' }}
-                                </td>
-
-                                <td>
-                                    {{ $report->created_at->format('d M Y') }}
-                                </td>
-
-                                <td>
-                                    @php
-                                        $statusColors = [
-                                            'pending' => 'warning',
-                                            'verified' => 'info',
-                                            'investigating' => 'primary',
-                                            'resolved' => 'success',
-                                            'rejected' => 'danger',
-                                        ];
-
-                                        $statusLabels = [
-                                            'pending' => 'Menunggu',
-                                            'verified' => 'Terverifikasi',
-                                            'investigating' => 'Diproses',
-                                            'resolved' => 'Selesai',
-                                            'rejected' => 'Ditolak',
-                                        ];
-                                    @endphp
-
-                                    <span class="badge text-bg-{{ $statusColors[$report->status] ?? 'secondary' }}">
-                                        {{ $statusLabels[$report->status] ?? $report->status }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <a
-                                        href="{{ url('/reports/track/' . $report->tracking_code) }}"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        Detail
+                                    <a href="{{ route('login') }}" class="btn btn-darkblue btn-sm">
+                                        Login Sekarang
                                     </a>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <h6 class="fw-bold">Belum ada laporan</h6>
-
-                                    <p class="text-secondary mb-0">
-                                        Laporan yang kamu kirim akan muncul di sini.
-                                    </p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endauth
                     </tbody>
+
                 </table>
             </div>
 
-            <div class="d-flex justify-content-end">
-                {{ $myReports->links() }}
-            </div>
-
+            @auth
+                <div class="d-flex justify-content-end">
+                    {{ $myReports->links() }}
+                </div>
+            @endauth
         </div>
     </div>
 
@@ -503,6 +537,9 @@
             <a href="#" class="text-decoration-none text-dark me-3">Ketentuan</a>
             <a href="#" class="text-decoration-none text-dark">Privasi</a>
         </div>
+        <small class="text-muted">
+            © 2026 LaporBah · Developed by Elsya Vindy
+        </small>
 
     </div>
 </footer>

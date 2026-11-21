@@ -56,11 +56,18 @@ class CitizenDashboardController extends Controller
             ])
             ->latest()
             ->get();
-        $myReports = Report::query()
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(5);
-        return view('citizen.dashboard', [
+
+        // My Reports - hanya untuk user yang sudah login
+        $myReports = null;
+
+        if ($request->user()) {
+            $myReports = Report::query()
+                ->where('user_id', $request->user()->id)
+                ->latest()
+                ->paginate(5);
+        }
+
+        return view('index', [
             'statistics' => $statistics,
             'updates' => $updates,
             'mapReports' => $mapReports,
