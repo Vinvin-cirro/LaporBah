@@ -30,7 +30,7 @@ class OfficerReportDetailTest extends TestCase
     private function createReport(): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Terjadi dugaan pembegalan di Jalan Sudirman.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
@@ -70,7 +70,7 @@ class OfficerReportDetailTest extends TestCase
             ->assertJson([
                 'id' => $report->id,
                 'tracking_code' => 'A8K2M9P4Q7XZ',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'Terjadi dugaan pembegalan di Jalan Sudirman.',
                 'location_name' => 'Jalan Sudirman',
                 'status' => 'pending',

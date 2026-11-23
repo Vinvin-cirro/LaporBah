@@ -14,7 +14,7 @@ class GovernanceReportListingTest extends TestCase
     private function createReport(array $attributes = []): Report
     {
         return Report::create(array_merge([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Laporan pengujian.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
@@ -83,15 +83,15 @@ class GovernanceReportListingTest extends TestCase
             'role' => 'governance',
         ]);
 
-        $this->createReport(['category' => 'begal']);
-        $this->createReport(['category' => 'dark']);
+        $this->createReport(['category' => 'begal_curas']);
+        $this->createReport(['category' => 'area_gelap']);
 
         $response = $this->actingAs($governance)
-            ->getJson('/governance/reports?category=dark');
+            ->getJson('/governance/reports?category=area_gelap');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.category', 'dark');
+            ->assertJsonPath('data.0.category', 'area_gelap');
     }
 
     public function test_reports_can_be_filtered_by_status(): void

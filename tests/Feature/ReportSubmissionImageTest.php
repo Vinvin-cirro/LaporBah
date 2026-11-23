@@ -23,7 +23,7 @@ class ReportSubmissionImageTest extends TestCase
     private function validReportData(): array
     {
         return [
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Terjadi dugaan pembegalan di jalan tersebut.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,

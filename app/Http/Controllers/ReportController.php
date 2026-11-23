@@ -19,7 +19,7 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category' => ['required', 'in:begal,dark'],
+            'category' => ['required', 'in:pju_rusak,area_gelap,begal_curas,lain_lain'],
             'description' => ['required', 'string', 'max:5000'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],

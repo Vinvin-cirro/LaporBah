@@ -122,15 +122,10 @@
                     <select name="category" class="form-select" required>
                         <option value="">Pilih kategori</option>
 
-                        <option value="begal"
-                            @selected(old('category') === 'begal')>
-                            Begal / CURAS
-                        </option>
-
-                        <option value="dark"
-                            @selected(old('category') === 'dark')>
-                            Area minim penerangan
-                        </option>
+                        <option value="pju_rusak" @selected(old('category') === 'pju_rusak')>PJU Rusak</option>
+                        <option value="area_gelap" @selected(old('category') === 'area_gelap')>Area Gelap</option>
+                        <option value="begal_curas" @selected(old('category') === 'begal_curas')>Begal/Curas</option>
+                        <option value="lain_lain" @selected(old('category') === 'lain_lain')>Lain-lain</option>
                     </select>
                 </div>
 

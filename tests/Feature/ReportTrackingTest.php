@@ -14,7 +14,7 @@ class ReportTrackingTest extends TestCase
     private function createReport(): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Laporan pengujian tracking.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
@@ -35,7 +35,7 @@ class ReportTrackingTest extends TestCase
         $response->assertOk()
             ->assertJson([
                 'tracking_code' => 'A8K2M9P4Q7XZ',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'location_name' => 'Jalan Sudirman',
                 'status' => 'pending',
             ]);

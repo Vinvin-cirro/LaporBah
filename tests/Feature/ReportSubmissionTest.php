@@ -14,7 +14,7 @@ class ReportSubmissionTest extends TestCase
     private function validReportData(): array
     {
         return [
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Terjadi dugaan pembegalan di jalan tersebut.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
@@ -39,7 +39,7 @@ class ReportSubmissionTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('reports', [
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'location_name' => 'Jalan Sudirman',
             'user_id' => null,
             'status' => 'pending',
@@ -64,16 +64,16 @@ class ReportSubmissionTest extends TestCase
 
         $this->assertDatabaseHas('reports', [
             'user_id' => $citizen->id,
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'status' => 'pending',
         ]);
     }
 
-    // Laporan kategori dark dapat dikirim
-    public function test_dark_report_can_be_submitted(): void
+    // Laporan kategori Area Gelap dapat dikirim
+    public function test_area_gelap_report_can_be_submitted(): void
     {
         $data = $this->validReportData();
-        $data['category'] = 'dark';
+        $data['category'] = 'area_gelap';
 
         $response = $this->postJson(
             route('reports.store'),
@@ -83,8 +83,26 @@ class ReportSubmissionTest extends TestCase
         $response->assertCreated();
 
         $this->assertDatabaseHas('reports', [
-            'category' => 'dark',
+            'category' => 'area_gelap',
         ]);
+    }
+
+    public function test_pju_rusak_report_can_be_submitted(): void
+    {
+        $data = $this->validReportData();
+        $data['category'] = 'pju_rusak';
+
+        $this->postJson(route('reports.store'), $data)->assertCreated();
+        $this->assertDatabaseHas('reports', ['category' => 'pju_rusak']);
+    }
+
+    public function test_lain_lain_report_can_be_submitted(): void
+    {
+        $data = $this->validReportData();
+        $data['category'] = 'lain_lain';
+
+        $this->postJson(route('reports.store'), $data)->assertCreated();
+        $this->assertDatabaseHas('reports', ['category' => 'lain_lain']);
     }
 
     // Kategori yang tidak valid ditolak

@@ -11,10 +11,18 @@ class GovernanceStatisticsController extends Controller
     {
         $totalReports = Report::count();
 
-        $categoryStatistics = Report::query()
+        $categoryTotals = Report::query()
             ->selectRaw('category, COUNT(*) as total')
             ->groupBy('category')
-            ->get();
+            ->pluck('total', 'category');
+
+        // Urutan selalu mengikuti empat kategori resmi agar label dan nilai grafik cocok.
+        $categoryStatistics = collect(Report::CATEGORIES)->map(
+            fn ($label, $category) => (object) [
+                'category' => $category,
+                'total' => (int) $categoryTotals->get($category, 0),
+            ]
+        )->values();
 
         $statusStatistics = Report::query()
             ->selectRaw('status, COUNT(*) as total')

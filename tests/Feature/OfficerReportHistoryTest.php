@@ -23,7 +23,7 @@ class OfficerReportHistoryTest extends TestCase
     private function createReport(): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Terjadi dugaan pembegalan di Jalan Sudirman.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,

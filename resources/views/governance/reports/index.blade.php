@@ -67,14 +67,9 @@
                     <label class="form-label small fw-semibold">Kategori</label>
                     <select name="category" class="form-select">
                         <option value="">Semua Kategori</option>
-                        <option value="begal"
-                            @selected(($filters['category'] ?? '') === 'begal')>
-                            Begal
-                        </option>
-                        <option value="dark"
-                            @selected(($filters['category'] ?? '') === 'dark')>
-                            Area Gelap
-                        </option>
+                        @foreach (\App\Models\Report::CATEGORIES as $value => $label)
+                            <option value="{{ $value }}" @selected(($filters['category'] ?? '') === $value)>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -169,15 +164,7 @@
                                 </td>
 
                                 <td>
-                                    @if ($report->category === 'begal')
-                                        <span class="badge bg-danger bg-opacity-10 text-danger">
-                                            Begal
-                                        </span>
-                                    @else
-                                        <span class="badge bg-warning bg-opacity-10 text-dark">
-                                            Area Gelap
-                                        </span>
-                                    @endif
+                                    <span class="badge bg-light text-dark">{{ $report->category_label }}</span>
                                 </td>
 
                                 <td>

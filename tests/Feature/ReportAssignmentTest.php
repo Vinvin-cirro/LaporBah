@@ -17,7 +17,7 @@ class ReportAssignmentTest extends TestCase
     protected function createReport(): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Contoh laporan pengujian.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,

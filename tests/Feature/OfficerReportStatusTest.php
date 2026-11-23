@@ -22,7 +22,7 @@ class OfficerReportStatusTest extends TestCase
     private function createReport(string $status = 'verified'): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Laporan pengujian status.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,

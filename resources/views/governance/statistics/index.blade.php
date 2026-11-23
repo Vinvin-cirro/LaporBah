@@ -10,55 +10,15 @@
         </p>
     </div>
 
-    {{-- Total Reports --}}
+    {{-- Total and category reports --}}
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small mb-2">
-                        Total Laporan
-                    </div>
-                    <h3 class="fw-bold mb-0">
-                        {{ $totalReports }}
-                    </h3>
-                    <small class="text-muted">
-                        Seluruh laporan yang tercatat
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small mb-2">
-                        Laporan Begal
-                    </div>
-                    <h3 class="fw-bold mb-0">
-                        {{ $categoryStatistics->firstWhere('category', 'begal')->total ?? 0 }}
-                    </h3>
-                    <small class="text-muted">
-                        Kategori begal
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small mb-2">
-                        Laporan Area Gelap
-                    </div>
-                    <h3 class="fw-bold mb-0">
-                        {{ $categoryStatistics->firstWhere('category', 'dark')->total ?? 0 }}
-                    </h3>
-                    <small class="text-muted">
-                        Kategori area gelap
-                    </small>
-                </div>
-            </div>
-        </div>
+        @foreach (\App\Models\Report::CATEGORIES as $key => $label)
+            <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-muted small mb-2">{{ $label }}</div>
+                <h3 class="fw-bold mb-0">{{ $categoryStatistics->firstWhere('category', $key)->total ?? 0 }}</h3>
+                <small class="text-muted">Jumlah laporan {{ strtolower($label) }}</small>
+            </div></div></div>
+        @endforeach
     </div>
 
     {{-- Charts --}}
@@ -136,12 +96,10 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'doughnut',
         data: {
-            labels: categoryLabels.map(label =>
-                label === 'dark' ? 'Area Gelap' : 'Begal'
-            ),
+            labels: categoryLabels.map(label => ({pju_rusak:'PJU Rusak', area_gelap:'Area Gelap', begal_curas:'Begal/Curas', lain_lain:'Lain-lain'}[label] || label)),
             datasets: [{
                 data: categoryValues,
-                backgroundColor: ['#dc3545', '#ffc107'],
+                backgroundColor: ['#0d6efd', '#ffc107', '#dc3545', '#6c757d'],
                 borderWidth: 0
             }]
         },

@@ -28,12 +28,9 @@
         <div class="col-6 col-xl-2">
             <select name="category" class="form-select">
                 <option value="">Semua kategori</option>
-                <option value="begal" @selected($selectedCategory === 'begal')>
-                    Begal
-                </option>
-                <option value="dark" @selected($selectedCategory === 'dark')>
-                    Area gelap
-                </option>
+                @foreach (\App\Models\Report::CATEGORIES as $value => $label)
+                    <option value="{{ $value }}" @selected($selectedCategory === $value)>{{ $label }}</option>
+                @endforeach
             </select>
         </div>
 
@@ -136,21 +133,10 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 small">
-
-                            <span>
-                                <span class="badge rounded-pill bg-danger">
-                                    &nbsp;
-                                </span>
-                                Begal
-                            </span>
-
-                            <span>
-                                <span class="badge rounded-pill bg-warning">
-                                    &nbsp;
-                                </span>
-                                Area gelap
-                            </span>
-
+                            <span><span class="badge rounded-pill bg-primary">&nbsp;</span> PJU Rusak</span>
+                            <span><span class="badge rounded-pill bg-warning">&nbsp;</span> Area Gelap</span>
+                            <span><span class="badge rounded-pill bg-danger">&nbsp;</span> Begal/Curas</span>
+                            <span><span class="badge rounded-pill bg-secondary">&nbsp;</span> Lain-lain</span>
                         </div>
 
                     </div>
@@ -234,30 +220,12 @@
 
 
                     {{-- CATEGORY --}}
-                    <div class="d-flex justify-content-between py-2 border-bottom">
-
-                        <span class="text-muted">
-                            CURAS / begal
-                        </span>
-
-                        <strong id="districtBegal">
-                            {{ $statistics['begal'] }}
-                        </strong>
-
-                    </div>
-
-
-                    <div class="d-flex justify-content-between py-2 border-bottom">
-
-                        <span class="text-muted">
-                            Area gelap
-                        </span>
-
-                        <strong id="districtDark">
-                            {{ $statistics['dark'] }}
-                        </strong>
-
-                    </div>
+                    @foreach (\App\Models\Report::CATEGORIES as $value => $label)
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">{{ $label }}</span>
+                            <strong id="districtCategory_{{ $value }}">{{ $statistics[$value] }}</strong>
+                        </div>
+                    @endforeach
 
 
                     {{-- STATUS --}}
@@ -863,14 +831,8 @@
         const total = filteredReports.length;
 
 
-        const begal = filteredReports.filter(
-            report => report.category === 'begal'
-        ).length;
-
-
-        const dark = filteredReports.filter(
-            report => report.category === 'dark'
-        ).length;
+        const categoryKeys = ['pju_rusak', 'area_gelap', 'begal_curas', 'lain_lain'];
+        const categoryCounts = Object.fromEntries(categoryKeys.map(key => [key, filteredReports.filter(report => report.category === key).length]));
 
 
         const pending = filteredReports.filter(
@@ -985,12 +947,10 @@
             `${verified.toLocaleString('id-ID')} terverifikasi / dalam penanganan`;
 
 
-        document.getElementById('districtBegal').textContent =
-            begal;
-
-
-        document.getElementById('districtDark').textContent =
-            dark;
+        categoryKeys.forEach(key => {
+            const target = document.getElementById(`districtCategory_${key}`);
+            if (target) target.textContent = categoryCounts[key];
+        });
 
 
         document.getElementById('districtPending').textContent =
@@ -1490,8 +1450,9 @@
         }
 
 
-        const isBegal =
-            report.category === 'begal';
+        const categoryColors = { pju_rusak: '#0d6efd', area_gelap: '#ffc107', begal_curas: '#dc3545', lain_lain: '#6c757d' };
+        const categoryLabels = { pju_rusak: 'PJU Rusak', area_gelap: 'Area Gelap', begal_curas: 'Begal/Curas', lain_lain: 'Lain-lain' };
+        const categoryColor = categoryColors[report.category] || '#6c757d';
 
 
         const color =
@@ -1504,9 +1465,7 @@
                 )
 
                 : (
-                    isBegal
-                        ? '#dc3545'
-                        : '#ffc107'
+                    categoryColor
                 );
 
 
@@ -1530,9 +1489,7 @@
                 color: color,
 
                 fillColor:
-                    isBegal
-                        ? '#dc3545'
-                        : '#ffc107',
+                    categoryColor,
 
                 fillOpacity: 0.9,
 
@@ -1547,11 +1504,7 @@
         // POPUP
         // ======================================
 
-        const categoryLabel =
-
-            isBegal
-                ? 'Begal'
-                : 'Area Gelap';
+        const categoryLabel = categoryLabels[report.category] || 'Lain-lain';
 
 
         const statusLabel =

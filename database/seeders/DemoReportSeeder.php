@@ -28,7 +28,7 @@ class DemoReportSeeder extends Seeder
         $reports = [
             [
                 'code' => 'DEMO00000001',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'DATA DUMMY — Simulasi laporan dugaan aksi begal di sekitar jalan permukiman.',
                 'latitude' => 3.5900,
                 'longitude' => 98.6750,
@@ -39,7 +39,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000002',
-                'category' => 'dark',
+                'category' => 'area_gelap',
                 'description' => 'DATA DUMMY — Simulasi laporan kondisi penerangan jalan yang minim.',
                 'latitude' => 3.6000,
                 'longitude' => 98.6800,
@@ -50,7 +50,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000003',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'DATA DUMMY — Simulasi laporan dugaan tindak kejahatan di jalan umum.',
                 'latitude' => 3.5850,
                 'longitude' => 98.6650,
@@ -63,7 +63,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000004',
-                'category' => 'dark',
+                'category' => 'pju_rusak',
                 'description' => 'DATA DUMMY — Simulasi laporan lampu penerangan jalan yang tidak berfungsi.',
                 'latitude' => 3.6050,
                 'longitude' => 98.6700,
@@ -76,7 +76,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000005',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'DATA DUMMY — Simulasi laporan dugaan aksi begal di jalur yang relatif sepi.',
                 'latitude' => 3.5800,
                 'longitude' => 98.6850,
@@ -90,7 +90,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000006',
-                'category' => 'dark',
+                'category' => 'area_gelap',
                 'description' => 'DATA DUMMY — Simulasi laporan area jalan dengan pencahayaan yang kurang.',
                 'latitude' => 3.6100,
                 'longitude' => 98.6800,
@@ -104,7 +104,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000007',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'DATA DUMMY — Simulasi laporan dugaan tindak kejahatan di sekitar jalan penghubung.',
                 'latitude' => 3.5750,
                 'longitude' => 98.6700,
@@ -118,7 +118,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000008',
-                'category' => 'begal',
+                'category' => 'begal_curas',
                 'description' => 'DATA DUMMY — Simulasi laporan dugaan tindak kejahatan yang telah selesai ditangani.',
                 'latitude' => 3.5950,
                 'longitude' => 98.6950,
@@ -133,7 +133,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000009',
-                'category' => 'dark',
+                'category' => 'area_gelap',
                 'description' => 'DATA DUMMY — Simulasi laporan penerangan jalan yang telah diperbaiki.',
                 'latitude' => 3.6150,
                 'longitude' => 98.6600,
@@ -148,7 +148,7 @@ class DemoReportSeeder extends Seeder
             ],
             [
                 'code' => 'DEMO00000010',
-                'category' => 'dark',
+                'category' => 'lain_lain',
                 'description' => 'DATA DUMMY — Simulasi laporan yang ditolak setelah proses pemeriksaan.',
                 'latitude' => 3.5850,
                 'longitude' => 98.6500,

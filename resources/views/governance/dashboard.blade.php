@@ -173,23 +173,15 @@
                         <canvas id="categoryChart"></canvas>
                     </div>
 
-                    <div class="d-flex justify-content-around mt-3">
-                        <div class="text-center">
-                            <span class="badge rounded-pill bg-danger">&nbsp;</span>
-                            <p class="small text-muted mb-0 mt-1">Begal</p>
-                            <strong>
-                                {{ number_format($categoryDistribution['begal']) }}
-                            </strong>
-                        </div>
-
-                        <div class="text-center">
-                            <span class="badge rounded-pill bg-warning">&nbsp;</span>
-                            <p class="small text-muted mb-0 mt-1">Area Gelap</p>
-                            <strong>
-                                {{ number_format($categoryDistribution['dark']) }}
-                            </strong>
-                        </div>
+                    <div class="row row-cols-2 g-2 mt-3 text-center">
+                        @foreach (\App\Models\Report::CATEGORIES as $key => $label)
+                            <div class="col">
+                                <p class="small text-muted mb-0 mt-1">{{ $label }}</p>
+                                <strong>{{ number_format($categoryDistribution[$key] ?? 0) }}</strong>
+                            </div>
+                        @endforeach
                     </div>
+
                 </div>
             </div>
         </div>
@@ -343,15 +335,7 @@
                                 </td>
 
                                 <td>
-                                    @if ($report->category === 'begal')
-                                        <span class="badge bg-danger bg-opacity-10 text-danger">
-                                            Begal
-                                        </span>
-                                    @else
-                                        <span class="badge bg-warning bg-opacity-10 text-dark">
-                                            Area Gelap
-                                        </span>
-                                    @endif
+                                    <span class="badge bg-light text-dark">{{ $report->category_label }}</span>
                                 </td>
 
                                 <td>
@@ -461,34 +445,27 @@
     const dailyReports = @json($dailyReports);
 
     const chartLabels = dailyReports.map(item => item.label);
-    const begalData = dailyReports.map(item => item.begal);
-    const darkData = dailyReports.map(item => item.dark);
+    const categorySeries = [
+        { key: 'pju_rusak', label: 'PJU Rusak', color: '#0d6efd' },
+        { key: 'area_gelap', label: 'Area Gelap', color: '#ffc107' },
+        { key: 'begal_curas', label: 'Begal/Curas', color: '#dc3545' },
+        { key: 'lain_lain', label: 'Lain-lain', color: '#6c757d' }
+    ];
 
     // Grafik tren laporan
     new Chart(document.getElementById('reportTrendChart'), {
         type: 'line',
         data: {
             labels: chartLabels,
-            datasets: [
-                {
-                    label: 'Begal',
-                    data: begalData,
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    fill: true,
-                    tension: 0.35,
-                    borderWidth: 2
-                },
-                {
-                    label: 'Area Gelap',
-                    data: darkData,
-                    borderColor: '#ffc107',
-                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                    fill: true,
-                    tension: 0.35,
-                    borderWidth: 2
-                }
-            ]
+            datasets: categorySeries.map(series => ({
+                label: series.label,
+                data: dailyReports.map(item => item[series.key] || 0),
+                borderColor: series.color,
+                backgroundColor: series.color + '22',
+                fill: false,
+                tension: 0.35,
+                borderWidth: 2
+            }))
         },
         options: {
             responsive: true,
@@ -513,13 +490,10 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Begal', 'Area Gelap'],
+            labels: categorySeries.map(series => series.label),
             datasets: [{
-                data: [
-                    {{ $categoryDistribution['begal'] }},
-                    {{ $categoryDistribution['dark'] }}
-                ],
-                backgroundColor: ['#dc3545', '#ffc107'],
+                data: @json(array_values($categoryDistribution)),
+                backgroundColor: categorySeries.map(series => series.color),
                 borderWidth: 0
             }]
         },

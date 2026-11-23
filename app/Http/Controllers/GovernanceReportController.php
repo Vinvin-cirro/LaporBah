@@ -15,7 +15,7 @@ class GovernanceReportController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'category' => ['nullable', 'in:begal,dark'],
+            'category' => ['nullable', 'in:pju_rusak,area_gelap,begal_curas,lain_lain'],
             'status' => ['nullable', 'string', 'max:20'],
             'search' => ['nullable', 'string', 'max:255'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -184,7 +184,7 @@ class GovernanceReportController extends Controller
                 'old_status' => $oldStatus,
                 'new_status' => $newStatus,
                 'action' => $action,
-                'note' => $validated['note'],
+                'note' => $request->input('note'),
             ]);
 
             return ['old_status' => $oldStatus, 'new_status' => $newStatus];

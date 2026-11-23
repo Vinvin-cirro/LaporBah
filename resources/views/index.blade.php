@@ -269,7 +269,7 @@
 <main class="container dashboard">
 
     <div class="mb-4">
-        <h1 class="page-title">Beranda</h1>
+        <!-- <h1 class="page-title">Beranda</h1> -->
 
         <p class="muted">
             @auth
@@ -284,39 +284,15 @@
 
     <!-- Statistics -->
     <div class="row g-3 mb-4">
-
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div>CURAS / begal</div>
-                <div class="stat-number">{{ $statistics['begal'] }}</div>
-                <small class="muted">Laporan warga · pekan ini</small>
+        @foreach (\App\Models\Report::CATEGORIES as $key => $label)
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div>{{ $label }}</div>
+                    <div class="stat-number">{{ $statistics[$key] }}</div>
+                    <small class="muted">Laporan warga · pekan ini</small>
+                </div>
             </div>
-        </div>
-
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div>Laporan area gelap</div>
-                <div class="stat-number">{{ $statistics['dark'] }}</div>
-                <small class="muted">Laporan warga · pekan ini</small>
-            </div>
-        </div>
-
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div>Menunggu tindakan</div>
-                <div class="stat-number">{{ $statistics['pending'] }}</div>
-                <small class="muted">Laporan berstatus pending</small>
-            </div>
-        </div>
-
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div>Wilayah diperbarui</div>
-                <div class="stat-number">{{ $statistics['updated_areas'] }}</div>
-                <small class="muted">Pembaruan pekan ini</small>
-            </div>
-        </div>
-
+        @endforeach
     </div>
 
     <!-- Map and Updates -->
@@ -327,19 +303,11 @@
                 <div id="securityMap"></div>
 
                 <div class="map-legend">
-                    <span class="me-3">
-                        <span class="legend-dot bg-danger"></span>
-                        Begal
-                    </span>
-
-                    <span class="me-3">
-                        <span class="legend-dot bg-warning"></span>
-                        Area gelap
-                    </span>
-
-                    <span class="muted">
-                        Titik menunjukkan lokasi laporan, bukan kepastian tingkat bahaya.
-                    </span>
+                    <span class="me-3"><span class="legend-dot bg-primary"></span> PJU Rusak</span>
+                    <span class="me-3"><span class="legend-dot bg-warning"></span> Area Gelap</span>
+                    <span class="me-3"><span class="legend-dot bg-danger"></span> Begal/Curas</span>
+                    <span class="me-3"><span class="legend-dot bg-secondary"></span> Lain-lain</span>
+                    <span class="muted">Titik menunjukkan lokasi laporan, bukan kepastian tingkat bahaya.</span>
                 </div>
             </div>
         </div>
@@ -419,9 +387,7 @@
                                     </td>
 
                                     <td>
-                                        {{ $report->category === 'begal'
-                                            ? 'Begal / CURAS'
-                                            : 'Area Gelap' }}
+                                        {{ $report->category_label }}
                                     </td>
 
                                     <td>
@@ -583,9 +549,8 @@
             return;
         }
 
-        const color = report.category === 'begal'
-            ? '#dc3545'
-            : '#f0ad00';
+        const categoryColors = { pju_rusak: '#0d6efd', area_gelap: '#f0ad00', begal_curas: '#dc3545', lain_lain: '#6c757d' };
+        const color = categoryColors[report.category] || '#6c757d';
 
         L.circleMarker([lat, lng], {
             radius: 8,
@@ -594,7 +559,7 @@
             fillOpacity: 0.8
         })
         .bindPopup(`
-            <strong>${report.category === 'begal' ? 'Laporan begal' : 'Area gelap'}</strong>
+            <strong>${({pju_rusak:'PJU Rusak', area_gelap:'Area Gelap', begal_curas:'Begal/Curas', lain_lain:'Lain-lain'})[report.category] || 'Laporan'}</strong>
             <br>
             ${report.location_name ?? 'Lokasi laporan'}
             <br>

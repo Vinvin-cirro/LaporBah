@@ -9,6 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Report extends Model
 {
+    public const CATEGORIES = [
+        'pju_rusak' => 'PJU Rusak',
+        'area_gelap' => 'Area Gelap',
+        'begal_curas' => 'Begal/Curas',
+        'lain_lain' => 'Lain-lain',
+    ];
+
+    public function getCategoryLabelAttribute(): string
+    {
+        return self::CATEGORIES[$this->category] ?? 'Lain-lain';
+    }
+
     protected $fillable = [
         'user_id',
         'category',

@@ -20,23 +20,14 @@ class CitizenDashboardController extends Controller
         );
 
         $statistics = [
-            'begal' => (clone $reportsThisWeek)
-                ->where('category', 'begal')
-                ->count(),
-
-            'dark' => (clone $reportsThisWeek)
-                ->where('category', 'dark')
-                ->count(),
-
-            'pending' => Report::where('status', 'pending')
-                ->count(),
-
-            'updated_areas' => Area::whereHas(
-                'updates',
-                function ($query) use ($startOfWeek) {
-                    $query->where('created_at', '>=', $startOfWeek);
-                }
-            )->count(),
+            'pju_rusak' => (clone $reportsThisWeek)->where('category', 'pju_rusak')->count(),
+            'area_gelap' => (clone $reportsThisWeek)->where('category', 'area_gelap')->count(),
+            'begal_curas' => (clone $reportsThisWeek)->where('category', 'begal_curas')->count(),
+            'lain_lain' => (clone $reportsThisWeek)->where('category', 'lain_lain')->count(),
+            'pending' => Report::where('status', 'pending')->count(),
+            'updated_areas' => Area::whereHas('updates', function ($query) use ($startOfWeek) {
+                $query->where('created_at', '>=', $startOfWeek);
+            })->count(),
         ];
 
         $updates = AreaUpdate::with(['area', 'updater'])

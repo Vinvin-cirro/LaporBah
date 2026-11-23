@@ -14,9 +14,8 @@
 
     $reportCategory = strtolower(trim($report->category ?? ''));
 
-    $isBegal = str_contains($reportCategory, 'begal');
-
-    $isDark = str_contains($reportCategory, 'dark');
+    $isBegal = $reportCategory === 'begal_curas' || $reportCategory === 'begal';
+    $categoryLabel = \App\Models\Report::CATEGORIES[$reportCategory] ?? $report->category;
 
     $statusLabels = [
 
@@ -190,9 +189,9 @@
 
                     <div class="card-body p-4">
 
-                        <h5 class="fw-bold mb-3">{{ $report->category === 'dark' ? 'Penerangan jalan / area gelap' : 'Laporan begal' }}</h5>
+                        <h5 class="fw-bold mb-3">{{ $categoryLabel }}</h5>
 
-                        <div class="small text-secondary mb-3"><span class="fw-semibold text-dark">{{ $report->tracking_code }}</span> <span class="mx-1">•</span>{{ $report->category === 'dark' ? 'PJU / area gelap' : 'Keamanan / begal' }} <span class="mx-1">•</span>Aplikasi warga</div>
+                        <div class="small text-secondary mb-3"><span class="fw-semibold text-dark">{{ $report->tracking_code }}</span> <span class="mx-1">•</span>{{ $categoryLabel }} <span class="mx-1">•</span>Aplikasi warga</div>
 
                         <p class="text-secondary mb-4" style="white-space: pre-line">{{ $report->description }}</p>
 
@@ -358,7 +357,7 @@
 
                             <div class="row g-3">
 
-                                <div class="col-md-6"><small class="text-secondary">Kategori</small><div class="fw-semibold">{{ ucfirst(str_replace('_', ' ', $report->category)) }}</div></div>
+                                <div class="col-md-6"><small class="text-secondary">Kategori</small><div class="fw-semibold">{{ $categoryLabel }}</div></div>
 
                                 <div class="col-md-6"><small class="text-secondary">Lokasi</small><div class="fw-semibold">{{ $report->location_name ?? 'Tidak dicantumkan' }}</div></div>
 
@@ -460,11 +459,11 @@
 
                         <h5 class="fw-bold mb-3">Ringkasan laporan</h5>
 
-                        <div class="fw-semibold mb-3">{{ $report->tracking_code }}<br>{{ ucfirst(str_replace('_', ' ', $report->category)) }}<br>{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</div>
+                        <div class="fw-semibold mb-3">{{ $report->tracking_code }}<br>{{ $categoryLabel }}<br>{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</div>
 
                         <div class="text-secondary small mb-3">Terverifikasi oleh {{ $verificationUpdate?->updater?->name ?? auth()->user()->name }}<br>{{ $verificationUpdate?->created_at?->translatedFormat('j M Y, H.i') ?? '-' }} WIB</div>
 
-                        <div class="text-secondary small">Kategori: {{ ucfirst(str_replace('_', ' ', $report->category)) }}<br>Sumber: aplikasi warga</div>
+                        <div class="text-secondary small">Kategori: {{ $categoryLabel }}<br>Sumber: aplikasi warga</div>
 
                     </div></div>
 
@@ -472,13 +471,13 @@
 
                         <h5 class="fw-bold mb-3">Eskalasi &amp; koordinasi</h5>
 
-                        @if($report->category === 'begal')
+                        @if($isBegal)
 
                             <p class="text-secondary">Untuk laporan kriminalitas atau begal, koordinasikan penanganan dengan kepolisian yang berwenang. Pilih prioritas Urgen jika kondisi membutuhkan penanganan segera.</p>
 
                         @else
 
-                            <p class="text-secondary">Untuk laporan fasilitas dan penerangan jalan, pilih instansi teknis yang sesuai dengan kewenangannya. Pastikan instruksi penugasan menjelaskan tindakan yang perlu dilakukan di lapangan.</p>
+                            <p class="text-secondary">Untuk laporan {{ $categoryLabel }}, pilih instansi teknis atau penanggung jawab yang sesuai dengan kewenangannya. Pastikan instruksi penugasan menjelaskan tindakan yang perlu dilakukan di lapangan.</p>
 
                         @endif
 
@@ -578,7 +577,7 @@
 
             </div>
 
-            <div class="col-lg-4"><div class="card border shadow-sm rounded-4 h-100"><div class="card-body p-4"><h5 class="fw-bold mb-3">Ringkasan laporan</h5><div class="fw-semibold">{{ $report->tracking_code }}<br>{{ ucfirst(str_replace('_', ' ', $report->category)) }}</div><p class="text-secondary mt-3 mb-0">{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</p></div></div></div>
+            <div class="col-lg-4"><div class="card border shadow-sm rounded-4 h-100"><div class="card-body p-4"><h5 class="fw-bold mb-3">Ringkasan laporan</h5><div class="fw-semibold">{{ $report->tracking_code }}<br>{{ $categoryLabel }}</div><p class="text-secondary mt-3 mb-0">{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</p></div></div></div>
 
         </div>
 
@@ -624,7 +623,7 @@
 
             </div>
 
-            <div class="col-lg-4"><div class="card border shadow-sm rounded-4 h-100"><div class="card-body p-4"><h5 class="fw-bold mb-3">Ringkasan laporan</h5><div class="fw-semibold">{{ $report->tracking_code }}<br>{{ ucfirst(str_replace('_', ' ', $report->category)) }}</div><p class="text-secondary mt-3 mb-0">{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</p></div></div></div>
+            <div class="col-lg-4"><div class="card border shadow-sm rounded-4 h-100"><div class="card-body p-4"><h5 class="fw-bold mb-3">Ringkasan laporan</h5><div class="fw-semibold">{{ $report->tracking_code }}<br>{{ $categoryLabel }}</div><p class="text-secondary mt-3 mb-0">{{ $report->location_name ?? 'Lokasi tidak dicantumkan' }}</p></div></div></div>
 
         </div>
 

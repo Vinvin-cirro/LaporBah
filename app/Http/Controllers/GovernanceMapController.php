@@ -14,7 +14,7 @@ class GovernanceMapController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'category' => 'nullable|in:begal,dark',
+            'category' => 'nullable|in:pju_rusak,area_gelap,begal_curas,lain_lain',
             'status' => 'nullable|in:pending,verified,investigating,resolved,rejected',
             'period' => 'nullable|in:7,30,90,all',
             'risk' => 'nullable|in:high,medium,low,noise',
@@ -105,8 +105,10 @@ class GovernanceMapController extends Controller
             'verified' => $visibleReports->whereIn('status', ['verified', 'investigating', 'resolved'])->count(),
             'investigating' => $visibleReports->where('status', 'investigating')->count(),
             'resolved' => $visibleReports->where('status', 'resolved')->count(),
-            'begal' => $visibleReports->where('category', 'begal')->count(),
-            'dark' => $visibleReports->where('category', 'dark')->count(),
+            'pju_rusak' => $visibleReports->where('category', 'pju_rusak')->count(),
+            'area_gelap' => $visibleReports->where('category', 'area_gelap')->count(),
+            'begal_curas' => $visibleReports->where('category', 'begal_curas')->count(),
+            'lain_lain' => $visibleReports->where('category', 'lain_lain')->count(),
             'high' => $visibleReports->where('risk', 'high')->count(),
             'medium' => $visibleReports->where('risk', 'medium')->count(),
             'low' => $visibleReports->where('risk', 'low')->count(),
@@ -234,7 +236,7 @@ class GovernanceMapController extends Controller
                 'latitude_sum' => 0,
                 'longitude_sum' => 0,
                 'report_ids' => [],
-                'categories' => ['begal' => 0, 'dark' => 0],
+                'categories' => ['pju_rusak' => 0, 'area_gelap' => 0, 'begal_curas' => 0, 'lain_lain' => 0],
                 'statuses' => [],
                 'locations' => [],
             ];

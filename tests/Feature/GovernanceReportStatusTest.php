@@ -14,7 +14,7 @@ class GovernanceReportStatusTest extends TestCase
     private function createReport(string $status = 'pending'): Report
     {
         return Report::create([
-            'category' => 'begal',
+            'category' => 'begal_curas',
             'description' => 'Laporan pengujian status.',
             'latitude' => -6.2000000,
             'longitude' => 106.8166667,
@@ -33,22 +33,22 @@ class GovernanceReportStatusTest extends TestCase
         ]);
     }
 
-    public function test_governance_cannot_update_report_status(): void
+    public function test_governance_can_update_report_status(): void
     {
         $governance = User::factory()->create([
             'role' => 'governance',
         ]);
 
-        $report = $this->createReport();
+        $report = $this->createReport('pending');
 
         $this->actingAs($governance)->patchJson(
             "/governance/reports/{$report->id}/status",
             ['status' => 'verified']
-        )->assertForbidden();
+        )->assertOk();
 
         $this->assertDatabaseHas('reports', [
             'id' => $report->id,
-            'status' => 'pending',
+            'status' => 'verified',
         ]);
     }
 

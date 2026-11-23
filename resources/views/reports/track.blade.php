@@ -92,7 +92,7 @@
                 <div class="col-md-6">
                     <small class="text-muted">Kategori Laporan</small>
                     <p class="fw-semibold mb-0">
-                        {{ $report->category === 'begal' ? 'Begal / CURAS' : 'Area Minim Penerangan' }}
+                        {{ $report->category_label }}
                     </p>
                 </div>
 

@@ -59,23 +59,26 @@ class GovernanceDashboardController extends Controller
             $counts = $dailyCounts->get($dateKey, collect())
                 ->keyBy('category');
 
-            $begal = (int) ($counts->get('begal')->total ?? 0);
-            $dark = (int) ($counts->get('dark')->total ?? 0);
+            $pjuRusak = (int) ($counts->get('pju_rusak')->total ?? 0);
+            $areaGelap = (int) ($counts->get('area_gelap')->total ?? 0);
+            $begalCuras = (int) ($counts->get('begal_curas')->total ?? 0);
+            $lainLain = (int) ($counts->get('lain_lain')->total ?? 0);
 
             return [
                 'date' => $dateKey,
                 'label' => $date->translatedFormat('D'),
-                'begal' => $begal,
-                'dark' => $dark,
-                'total' => $begal + $dark,
+                'pju_rusak' => $pjuRusak,
+                'area_gelap' => $areaGelap,
+                'begal_curas' => $begalCuras,
+                'lain_lain' => $lainLain,
+                'total' => $pjuRusak + $areaGelap + $begalCuras + $lainLain,
             ];
         });
 
         // Distribusi laporan berdasarkan kategori
-        $categoryDistribution = [
-            'begal' => Report::where('category', 'begal')->count(),
-            'dark' => Report::where('category', 'dark')->count(),
-        ];
+        $categoryDistribution = collect(Report::CATEGORIES)->mapWithKeys(
+            fn ($label, $category) => [$category => Report::where('category', $category)->count()]
+        )->all();
 
         // Area dengan laporan yang masih aktif
         $priorityAreas = Area::query()
