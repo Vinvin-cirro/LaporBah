@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Report;
 use App\Models\ReportAssignment;
 use App\Models\User;
+use App\Models\OfficerTaskUpdate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -84,15 +85,25 @@ class ReportAssignmentService
             }
 
             // Buat penugasan baru.
-            return ReportAssignment::create(array_merge(
+            $assignment = ReportAssignment::create(array_merge(
                 [
                     'report_id' => $report->id,
                     'officer_id' => $officer->id,
                     'assigned_at' => now(),
                     'ended_at' => null,
+                    'status' => 'assigned',
                 ],
                 $assignmentData
             ));
+
+            OfficerTaskUpdate::create([
+                'report_assignment_id' => $assignment->id,
+                'user_id' => $assignedBy,
+                'event' => 'assigned',
+                'note' => $note ?? 'Tugas diberikan kepada petugas.',
+            ]);
+
+            return $assignment;
         });
     }
 }

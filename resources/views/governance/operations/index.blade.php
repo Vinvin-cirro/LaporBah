@@ -130,9 +130,14 @@
                                 <td>
                                     @if ($assignment->report)
                                         <a href="{{ route('governance.reports.show', $assignment->report->id) }}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            Detail
-                                        </a>
+                                           class="btn btn-sm btn-outline-primary">Detail</a>
+                                        @if ($assignment->status === 'awaiting_confirmation')
+                                            <form method="POST" action="{{ route('governance.operations.verify', $assignment) }}" class="d-inline" onsubmit="return confirm('Verifikasi penyelesaian tugas ini?')">
+                                                @csrf
+                                                <button class="btn btn-sm btn-success">Verifikasi selesai</button>
+                                            </form>
+                                        @endif
+                                        <div class="small text-muted mt-1">Tugas: {{ str_replace('_', ' ', ucfirst($assignment->status ?? 'assigned')) }}</div>
                                     @else
                                         -
                                     @endif

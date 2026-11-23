@@ -1,0 +1,1 @@
+<div class="small muted">Alur Begal/Curas: lakukan patroli berkala dan simpan setiap kegiatan melalui form Laporan Patroli Harian. Setiap laporan harian merupakan catatan terpisah dan dapat memiliki beberapa foto.</div>

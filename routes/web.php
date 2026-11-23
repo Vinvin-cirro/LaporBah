@@ -86,34 +86,18 @@ Route::post('/logout', [
 // ==================================================
 
 Route::middleware(['auth', 'role:officer'])
-    ->prefix('officer')
-    ->name('officer.')
-    ->group(function () {
-
-        Route::get('/dashboard', function () {
-            return 'Officer Dashboard';
-        })->name('dashboard');
-
-        Route::get('/reports', [
-            OfficerReportController::class,
-            'index'
-        ])->name('reports.index');
-
-        Route::get('/reports/{report}', [
-            OfficerReportController::class,
-            'show'
-        ])->name('reports.show');
-
-        Route::patch('/reports/{report}/status', [
-            OfficerReportController::class,
-            'updateStatus'
-        ])->name('reports.status');
-
-        Route::get('/reports/{report}/history', [
-            OfficerReportController::class,
-            'history'
-        ])->name('reports.history');
-
+    ->prefix('officer')->name('officer.')->group(function () {
+        Route::get('/dashboard', [OfficerReportController::class, 'dashboard'])->name('dashboard');
+        Route::get('/map', [OfficerReportController::class, 'map'])->name('map');
+        Route::get('/reports', [OfficerReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{report}', [OfficerReportController::class, 'show'])->name('reports.show');
+        Route::get('/reports/{report}/history', [OfficerReportController::class, 'history'])->name('reports.history');
+        Route::post('/reports/{report}/accept', [OfficerReportController::class, 'accept'])->name('reports.accept');
+        Route::post('/reports/{report}/start', [OfficerReportController::class, 'start'])->name('reports.start');
+        Route::post('/reports/{report}/progress', [OfficerReportController::class, 'progress'])->name('reports.progress');
+        Route::post('/reports/{report}/documents', [OfficerReportController::class, 'upload'])->name('reports.documents');
+        Route::post('/reports/{report}/patrol', [OfficerReportController::class, 'patrol'])->name('reports.patrol');
+        Route::post('/reports/{report}/complete', [OfficerReportController::class, 'complete'])->name('reports.complete');
     });
 
 
@@ -160,6 +144,11 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             GovernanceOperationController::class,
             'index'
         ])->name('operations');
+
+        Route::post('/operations/{assignment}/verify', [
+            GovernanceOperationController::class,
+            'verify'
+        ])->name('operations.verify');
 
         Route::get('/statistics', [
             GovernanceStatisticsController::class,

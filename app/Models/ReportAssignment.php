@@ -14,6 +14,11 @@ class ReportAssignment extends Model
         'institution_name',
         'team_name',
         'priority',
+        'status',
+        'accepted_at',
+        'started_at',
+        'completion_requested_at',
+        'completed_at',
         'assigned_at',
         'due_at',
         'ended_at',
@@ -26,6 +31,10 @@ class ReportAssignment extends Model
             'assigned_at' => 'datetime',
             'due_at' => 'datetime',
             'ended_at' => 'datetime',
+            'accepted_at' => 'datetime',
+            'started_at' => 'datetime',
+            'completion_requested_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -38,6 +47,12 @@ class ReportAssignment extends Model
     {
         return $this->belongsTo(User::class, 'officer_id');
     }
+
+    public function updates() { return $this->hasMany(OfficerTaskUpdate::class)->latest(); }
+
+    public function documents() { return $this->hasMany(OfficerTaskDocument::class)->latest(); }
+
+    public function patrolLogs() { return $this->hasMany(OfficerPatrolLog::class)->with('images')->latest('patrol_date'); }
 
     public function assigner(): BelongsTo
     {
