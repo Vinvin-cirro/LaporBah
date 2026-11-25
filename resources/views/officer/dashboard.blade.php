@@ -128,60 +128,6 @@
 
         </section>
 
-        {{-- RECENT TASKS --}}
-        <section class="panel">
-
-            <div class="mb-3">
-                <h2 class="mb-1">Penugasan Terbaru</h2>
-                <p class="muted small mb-0">
-                    Riwayat penugasan yang terakhir diterima.
-                </p>
-            </div>
-
-            @forelse($tasks->take(3) as $a)
-
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}">
-
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-light p-3">
-                            <i class="bi bi-file-earmark-text fs-5 text-secondary"></i>
-                        </div>
-
-                        <div>
-                            <div class="fw-semibold">
-                                {{ $a->report->tracking_code ?? 'TGS-'.$a->id }}
-                            </div>
-
-                            <div class="small muted mt-1">
-                                {{ $a->report->category_label }}
-                            </div>
-
-                            <div class="small muted mt-1">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                {{ $a->report->location_name }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <div class="small muted">
-                            {{ $a->assigned_at?->format('d M Y') ?? '-' }}
-                        </div>
-                        <div class="small muted">
-                            {{ $a->assigned_at?->format('H:i') ?? '' }}
-                        </div>
-                    </div>
-
-                </div>
-
-            @empty
-                <p class="muted small mb-0">
-                    Belum ada riwayat penugasan.
-                </p>
-            @endforelse
-
-        </section>
-
     </div>
 
     {{-- RIGHT SIDEBAR --}}

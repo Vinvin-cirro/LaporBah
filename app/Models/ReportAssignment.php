@@ -10,6 +10,8 @@ class ReportAssignment extends Model
     protected $fillable = [
         'report_id',
         'officer_id',
+        'team_id',
+        'assignment_type',
         'assigned_by',
         'institution_name',
         'team_name',
@@ -41,6 +43,11 @@ class ReportAssignment extends Model
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function officer(): BelongsTo

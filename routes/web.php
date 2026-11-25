@@ -14,6 +14,7 @@ use App\Http\Controllers\GovernanceOperationController;
 use App\Http\Controllers\GovernanceStatisticsController;
 use App\Http\Controllers\OfficerReportController;
 use App\Http\Controllers\ReportAssignmentController;
+use App\Http\Controllers\GovernanceTeamController;
 
 
 // ==================================================
@@ -140,6 +141,13 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             'store'
         ])->name('reports.assign');
 
+        Route::get('/teams', [GovernanceTeamController::class, 'index'])->name('teams.index');
+        Route::get('/teams/create', [GovernanceTeamController::class, 'create'])->name('teams.create');
+        Route::post('/teams', [GovernanceTeamController::class, 'store'])->name('teams.store');
+        Route::get('/teams/{team}/edit', [GovernanceTeamController::class, 'edit'])->name('teams.edit');
+        Route::put('/teams/{team}', [GovernanceTeamController::class, 'update'])->name('teams.update');
+        Route::patch('/teams/{team}/toggle', [GovernanceTeamController::class, 'toggle'])->name('teams.toggle');
+
         Route::get('/operations', [
             GovernanceOperationController::class,
             'index'
@@ -149,6 +157,11 @@ Route::middleware(['auth', 'role:governance,superadmin'])
             GovernanceOperationController::class,
             'verify'
         ])->name('operations.verify');
+
+        Route::post('/reports/inspections/{assignment}/review', [
+            GovernanceOperationController::class,
+            'reviewInspection'
+        ])->name('reports.inspections.review');
 
         Route::get('/statistics', [
             GovernanceStatisticsController::class,

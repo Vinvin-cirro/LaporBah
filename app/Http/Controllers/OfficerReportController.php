@@ -16,8 +16,12 @@ class OfficerReportController extends Controller
 {
     private function tasks(Request $request)
     {
-        return ReportAssignment::query()->with(['report.images','officer','assigner'])
-            ->where('officer_id', $request->user()->id)->whereNull('ended_at');
+        return ReportAssignment::query()->with(['report.images','officer','assigner','team.members'])
+            ->whereNull('ended_at')
+            ->where(function ($query) use ($request) {
+                $query->whereHas('team.members', fn ($members) => $members->where('users.id', $request->user()->id))
+                    ->orWhere(fn ($legacy) => $legacy->whereNull('team_id')->where('officer_id', $request->user()->id));
+            });
     }
 
     private function owned(
@@ -28,13 +32,17 @@ class OfficerReportController extends Controller
         $assignment = ReportAssignment::query()
             ->with([
                 'report.images',
+                'team.members',
                 'updates.user',
                 'documents',
                 'patrolLogs.images'
             ])
             ->where('report_id', $report->id)
-            ->where('officer_id', $request->user()->id)
             ->whereNull('ended_at')
+            ->where(function ($query) use ($request) {
+                $query->whereHas('team.members', fn ($members) => $members->where('users.id', $request->user()->id))
+                    ->orWhere(fn ($legacy) => $legacy->whereNull('team_id')->where('officer_id', $request->user()->id));
+            })
             ->first();
 
         abort_unless($assignment, $statusCode);
@@ -70,6 +78,8 @@ class OfficerReportController extends Controller
             'lng' => (float)$a->report->longitude, 'category' => $a->report->category,
             'label' => $a->report->category_label, 'location' => $a->report->location_name,
             'status' => $a->status, 'url' => route('officer.reports.show',$a->report_id),
+            'description' => $a->report->description, 'date' => $a->report->created_at?->format('d/m/Y H:i'),
+            'team' => $a->team?->name ?? $a->team_name,
         ])->values();
         return view('officer.map', compact('points'));
     }
@@ -196,23 +206,48 @@ class OfficerReportController extends Controller
             throw ValidationException::withMessages(['completion_note'=>'Tambahkan minimal satu laporan patroli harian sebelum mengajukan penyelesaian.']);
         }
         $kinds = $assignment->documents()->pluck('kind')->unique()->all();
-        if ($report->category === 'pju_rusak') {
+        if ($assignment->assignment_type === 'inspection') {
+            if (!in_array($report->category, ['pju_rusak', 'area_gelap'], true)) {
+                abort(422, 'Kategori laporan ini tidak mendukung inspeksi pra-verifikasi.');
+            }
+            if ($assignment->documents()->count() < 1) {
+                throw ValidationException::withMessages(['completion_note' => 'Unggah minimal satu foto bukti pemeriksaan sebelum mengirim hasil inspeksi.']);
+            }
+            if (!$assignment->updates()->where('event', 'progress')->exists()) {
+                throw ValidationException::withMessages(['completion_note' => 'Simpan hasil pemeriksaan pada Catatan & laporan progres terlebih dahulu.']);
+            }
+        } elseif ($report->category === 'pju_rusak') {
             if (!in_array('before',$kinds,true) || !in_array('after',$kinds,true)) {
                 throw ValidationException::withMessages(['completion_note'=>'PJU Rusak memerlukan foto kondisi sebelum dan sesudah perbaikan.']);
             }
-        } elseif ($report->category === 'area_gelap') {
+        } elseif ($assignment->assignment_type !== 'inspection' && $report->category === 'area_gelap') {
             if (!in_array('survey',$kinds,true) && !in_array('before',$kinds,true)) {
                 throw ValidationException::withMessages(['completion_note'=>'Area Gelap memerlukan dokumentasi kondisi awal atau survei.']);
             }
             if (preg_match('/pasang|instal/i', $assignment->note ?? '') && !in_array('installation',$kinds,true) && !in_array('after',$kinds,true)) {
                 throw ValidationException::withMessages(['completion_note'=>'Instruksi mencakup pemasangan; unggah dokumentasi pemasangan terlebih dahulu.']);
             }
-        } elseif ($report->category !== 'begal_curas' && !$kinds) {
+        } elseif ($assignment->assignment_type !== 'inspection' && $report->category !== 'begal_curas' && !$kinds) {
             throw ValidationException::withMessages(['completion_note'=>'Unggah dokumentasi lapangan sebelum mengajukan penyelesaian.']);
         }
-        DB::transaction(function () use ($assignment,$request,$data) {
-            $assignment->update(['status'=>'awaiting_confirmation','completion_requested_at'=>now()]);
-            $this->log($assignment,$request,'completion_requested',$data['completion_note']);
+        DB::transaction(function () use ($assignment, $request, $data, $report) {
+            $assignment->update([
+                'status' => 'awaiting_confirmation',
+                'completion_requested_at' => now(),
+            ]);
+
+            if ($assignment->assignment_type === 'inspection') {
+                $report->update([
+                    'status' => 'awaiting_approval',
+                ]);
+            }
+
+            $this->log(
+                $assignment,
+                $request,
+                'completion_requested',
+                $data['completion_note']
+            );
         });
         return back()->with('success','Konfirmasi penyelesaian dikirim kepada supervisor. Status laporan masyarakat tidak diubah.');
     }

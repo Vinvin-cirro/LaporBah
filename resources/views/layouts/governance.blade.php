@@ -195,6 +195,12 @@
                 <span>Manajemen Laporan</span>
             </a>
 
+            <a href="{{ route('governance.teams.index') }}"
+               class="sidebar-link {{ request()->is('governance/teams*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i>
+                <span>Manajemen Tim</span>
+            </a>
+
             <a href="{{ route('governance.operations') }}"
                class="sidebar-link {{ request()->is('governance/operations*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i>

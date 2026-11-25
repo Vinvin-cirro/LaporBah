@@ -71,7 +71,7 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Petugas</th>
+                            <th>Tim / Anggota</th>
                             <th>Kode Laporan</th>
                             <th>Kategori</th>
                             <th>Status Laporan</th>
@@ -86,10 +86,10 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold">
-                                        {{ $assignment->officer->name ?? 'Petugas tidak ditemukan' }}
+                                        {{ $assignment->team->name ?? $assignment->team_name ?? ($assignment->officer->name ?? 'Tim tidak ditemukan') }}
                                     </div>
                                     <small class="text-muted">
-                                        {{ $assignment->officer->email ?? '-' }}
+                                        {{ $assignment->team?->members?->pluck('name')->join(', ') ?: ($assignment->officer->email ?? '-') }}
                                     </small>
                                 </td>
 

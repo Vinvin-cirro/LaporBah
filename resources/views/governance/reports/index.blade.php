@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="col-12 col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
+                    <button type="submit" class="btn btn-primary-dark flex-grow-1">
                         <i class="bi bi-funnel me-1"></i>
                         Filter
                     </button>
@@ -229,5 +229,21 @@
     </div>
 
 </div>
+@push('styles')
+<style>
+    .btn-primary-dark {
+        background-color: #020d32;
+        border: 1px solid #020d32;
+        color: #fff;
+    }
 
+    .btn-primary-dark:hover,
+    .btn-primary-dark:focus,
+    .btn-primary-dark:active {
+        background-color: #06194d;
+        border-color: #06194d;
+        color: #fff;
+    }
+</style>
+@endpush
 @endsection

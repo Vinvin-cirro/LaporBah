@@ -12,6 +12,9 @@
 
                 <div class="small text-secondary">
                     {{ $assignment->report->category_label }}
+                    @if($assignment->assignment_type === 'inspection')
+                        <span class="badge bg-info-subtle text-info ms-1">Inspeksi pra-verifikasi</span>
+                    @endif
                 </div>
             </div>
 
@@ -31,6 +34,13 @@
             <i class="bi bi-geo-alt me-1"></i>
             {{ $assignment->report->location_name ?? 'Lokasi belum tersedia' }}
         </div>
+
+        @if($assignment->team)
+        <div class="small text-secondary mb-3">
+            <i class="bi bi-people me-1"></i>
+            {{ $assignment->team->name }} · {{ $assignment->team->members->pluck('name')->join(', ') }}
+        </div>
+        @endif
 
         <hr class="my-3">
 
