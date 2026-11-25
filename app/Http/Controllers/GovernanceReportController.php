@@ -20,23 +20,34 @@ class GovernanceReportController extends Controller
         $validated = $request->validate([
             'category' => ['nullable', 'in:pju_rusak,area_gelap,begal_curas,lain_lain'],
             'status' => ['nullable', 'string', 'max:20'],
+            'kecamatan' => ['nullable', 'string', 'max:100'],
             'search' => ['nullable', 'string', 'max:255'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
         $reports = Report::query()
             ->select([
-                'id', 'tracking_code', 'category', 'location_name',
-                'latitude', 'longitude', 'status', 'created_at',
+                'id',
+                'tracking_code',
+                'category',
+                'kecamatan',
+                'location_name',
+                'latitude',
+                'longitude',
+                'status',
+                'created_at',
             ])
             ->when($validated['category'] ?? null, fn ($query, $category) =>
                 $query->where('category', $category))
             ->when($validated['status'] ?? null, fn ($query, $status) =>
                 $query->where('status', $status))
+            ->when($validated['kecamatan'] ?? null, fn ($query, $kecamatan) =>
+                $query->where('kecamatan', $kecamatan))
             ->when($validated['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('tracking_code', 'like', "%{$search}%")
-                        ->orWhere('location_name', 'like', "%{$search}%");
+                        ->orWhere('location_name', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -87,7 +98,7 @@ class GovernanceReportController extends Controller
                 ->whereBetween('longitude', [$longitude - 0.02, $longitude + 0.02])
                 ->latest()
                 ->limit(100)
-                ->get(['id', 'tracking_code', 'category', 'location_name', 'latitude', 'longitude', 'status', 'created_at']);
+                ->get(['id', 'tracking_code', 'category', 'kecamatan', 'location_name', 'latitude', 'longitude', 'status', 'created_at']);
 
             $similarReports = $candidates->map(function ($candidate) use ($latitude, $longitude) {
                 $lat2 = (float) $candidate->latitude;
@@ -118,6 +129,7 @@ class GovernanceReportController extends Controller
             'category' => $report->category,
             'description' => $report->description,
             'location_name' => $report->location_name,
+            'kecamatan' => $report->kecamatan,
             'latitude' => $report->latitude,
             'longitude' => $report->longitude,
             'status' => $report->status,

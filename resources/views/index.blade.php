@@ -239,7 +239,7 @@
             <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
 
                 {{-- Tombol Lapor tetap tersedia untuk semua --}}
-                <a href="{{ route('reports.create') }}" class="btn btn-outline-light">
+                <a href="{{ route('reports.categories') }}" class="btn btn-outline-light">
                     + Lapor
                 </a>
 
@@ -364,7 +364,7 @@
                     </p>
                 </div>
 
-                <a href="{{ route('reports.create') }}" class="btn btn-outline-dark">
+                <a href="{{ route('reports.categories') }}" class="btn btn-outline-dark">
                     + Buat laporan
                 </a>
             </div>
@@ -486,7 +486,7 @@
             </p>
         </div>
 
-        <a href="{{ route('reports.create') }}" class="btn btn-darkblue">
+        <a href="{{ route('reports.categories') }}" class="btn btn-darkblue">
             + Buat laporan warga
         </a>
 

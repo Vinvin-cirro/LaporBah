@@ -46,6 +46,10 @@ Route::get('/reports/track/{trackingCode}', [
     'show'
 ])->name('reports.track');
 
+Route::get('/reports/categories', function () {
+    return view('reports.categories');
+})->name('reports.categories');
+
 
 // ==================================================
 // AUTHENTICATION

@@ -19,6 +19,7 @@ class GovernanceMapController extends Controller
             'period' => 'nullable|in:7,30,90,all',
             'risk' => 'nullable|in:high,medium,low,noise',
             'search' => 'nullable|string|max:150',
+            'kecamatan' => 'nullable|string|max:100',
         ]);
 
         $period = $request->input('period', '30');
@@ -26,11 +27,13 @@ class GovernanceMapController extends Controller
         $status = $request->input('status');
         $risk = $request->input('risk');
         $search = trim((string) $request->input('search', ''));
+        $kecamatan = $request->input('kecamatan');
 
         $query = Report::query()
             ->with('user:id,name')
             ->when($category, fn ($q) => $q->where('category', $category))
             ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($kecamatan, fn ($q) => $q->where('kecamatan', $kecamatan))
             ->when($period !== 'all', function ($q) use ($period) {
                 $q->where('created_at', '>=', Carbon::now()->subDays((int) $period));
             })
@@ -54,6 +57,7 @@ class GovernanceMapController extends Controller
             'location_name',
             'status',
             'created_at',
+            'kecamatan',
         ]);
 
         $clusterResult = $this->runDbscan($reports);
@@ -78,6 +82,7 @@ class GovernanceMapController extends Controller
                 'cluster_id' => $clusterId,
                 'cluster_count' => $cluster['count'] ?? 0,
                 'risk' => $cluster['risk'] ?? 'noise',
+                'kecamatan' => $report->kecamatan,
             ];
         })->values();
 
@@ -133,6 +138,7 @@ class GovernanceMapController extends Controller
             'search' => $search,
             'epsMeters' => self::DBSCAN_EPS_METERS,
             'minPoints' => self::DBSCAN_MIN_POINTS,
+            'selectedKecamatan' => $kecamatan,
         ]);
     }
 
@@ -167,6 +173,7 @@ class GovernanceMapController extends Controller
                 'lng' => $lng,
                 'category' => $report->category,
                 'location_name' => $report->location_name,
+                'kecamatan' => $report->kecamatan,
             ];
         }
 
@@ -248,10 +255,9 @@ class GovernanceMapController extends Controller
             $clusters[$label]['categories'][$point['category']] =
                 ($clusters[$label]['categories'][$point['category']] ?? 0) + 1;
 
-            if (!empty($point['location_name'])) {
-                $clusters[$label]['locations'][] = $point['location_name'];
+            if (!empty($point['kecamatan'])) {
+                $clusters[$label]['locations'][] = $point['kecamatan'];
             }
-
             $reportClusters[$point['id']] = $label;
         }
 

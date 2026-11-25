@@ -32,6 +32,7 @@ class ReportController extends Controller
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+            'kecamatan' => ['required', 'string', 'max:100'],
         ]);
 
         $storedPaths = [];
@@ -52,6 +53,7 @@ class ReportController extends Controller
                     'incident_at' => $validated['incident_at'] ?? null,
                     'status' => 'pending',
                     'tracking_code' => $this->generateTrackingCode(),
+                    'kecamatan' => $validated['kecamatan'],
                 ]);
 
                 foreach ($request->file('photos', []) as $photo) {

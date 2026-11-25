@@ -33,6 +33,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5900,
                 'longitude' => 98.6750,
                 'location' => 'Area Simulasi 01, Medan',
+                'kecamatan' => 'Medan Petisah',
                 'days_ago' => 1,
                 'status' => 'pending',
                 'updates' => [],
@@ -44,6 +45,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.6000,
                 'longitude' => 98.6800,
                 'location' => 'Area Simulasi 02, Medan',
+                'kecamatan' => 'Medan Timur',
                 'days_ago' => 2,
                 'status' => 'pending',
                 'updates' => [],
@@ -55,6 +57,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5850,
                 'longitude' => 98.6650,
                 'location' => 'Area Simulasi 03, Medan',
+                'kecamatan' => 'Medan Petisah',
                 'days_ago' => 3,
                 'status' => 'verified',
                 'updates' => [
@@ -68,6 +71,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.6050,
                 'longitude' => 98.6700,
                 'location' => 'Area Simulasi 04, Medan',
+                'kecamatan' => 'Medan Barat',
                 'days_ago' => 4,
                 'status' => 'verified',
                 'updates' => [
@@ -81,6 +85,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5800,
                 'longitude' => 98.6850,
                 'location' => 'Area Simulasi 05, Medan',
+                'kecamatan' => 'Medan Kota',
                 'days_ago' => 5,
                 'status' => 'investigating',
                 'updates' => [
@@ -95,6 +100,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.6100,
                 'longitude' => 98.6800,
                 'location' => 'Area Simulasi 06, Medan',
+                'kecamatan' => 'Medan Timur',
                 'days_ago' => 6,
                 'status' => 'investigating',
                 'updates' => [
@@ -109,6 +115,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5750,
                 'longitude' => 98.6700,
                 'location' => 'Area Simulasi 07, Medan',
+                'kecamatan' => 'Medan Polonia',
                 'days_ago' => 8,
                 'status' => 'investigating',
                 'updates' => [
@@ -123,6 +130,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5950,
                 'longitude' => 98.6950,
                 'location' => 'Area Simulasi 08, Medan',
+                'kecamatan' => 'Medan Perjuangan',
                 'days_ago' => 10,
                 'status' => 'resolved',
                 'updates' => [
@@ -138,6 +146,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.6150,
                 'longitude' => 98.6600,
                 'location' => 'Area Simulasi 09, Medan',
+                'kecamatan' => 'Medan Helvetia',
                 'days_ago' => 12,
                 'status' => 'resolved',
                 'updates' => [
@@ -153,6 +162,7 @@ class DemoReportSeeder extends Seeder
                 'latitude' => 3.5850,
                 'longitude' => 98.6500,
                 'location' => 'Area Simulasi 10, Medan',
+                'kecamatan' => 'Medan Petisah',
                 'days_ago' => 14,
                 'status' => 'rejected',
                 'updates' => [
@@ -185,6 +195,7 @@ class DemoReportSeeder extends Seeder
                         'latitude' => $data['latitude'],
                         'longitude' => $data['longitude'],
                         'location_name' => $data['location'],
+                        'kecamatan' => $data['kecamatan'],
                         'incident_at' => $incidentAt,
                         'status' => $data['status'],
                         'area_id' => null,

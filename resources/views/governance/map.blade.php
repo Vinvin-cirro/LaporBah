@@ -817,9 +817,18 @@
 
         const filteredReports = feature
 
-            ? reports.filter(report =>
-                reportInsideDistrict(report, feature)
-            )
+            ? reports.filter(report => {
+
+                // Gunakan kolom kecamatan jika tersedia.
+                if (report.kecamatan) {
+                    return report.kecamatan.trim().toLowerCase() ===
+                        getDistrictName(feature).trim().toLowerCase();
+                }
+
+                // Fallback untuk laporan lama yang belum memiliki kecamatan.
+                return reportInsideDistrict(report, feature);
+
+            })
 
             : reports;
 
@@ -1060,18 +1069,21 @@
         const reportsLink =
             document.getElementById('districtReportsLink');
 
-
         if (feature) {
 
-            reportsLink.href =
+            const url = new URL(
+                "{{ route('governance.reports.index') }}",
+                window.location.origin
+            );
 
-                "{{ route('governance.reports.index') }}" +
-                '?search=' +
-                encodeURIComponent(getDistrictName(feature));
+            url.searchParams.set(
+                'kecamatan',
+                getDistrictName(feature)
+            );
 
+            reportsLink.href = url.toString();
 
             reportsLink.innerHTML =
-
                 'Lihat laporan wilayah ' +
                 '<i class="bi bi-arrow-right ms-1"></i>';
 
@@ -1080,14 +1092,11 @@
             reportsLink.href =
                 "{{ route('governance.reports.index') }}";
 
-
             reportsLink.innerHTML =
-
                 'Lihat laporan sesuai filter ' +
                 '<i class="bi bi-arrow-right ms-1"></i>';
 
         }
-
 
         // ======================================
         // RESET BUTTON
@@ -1558,6 +1567,10 @@
 
                 </p>
 
+                <p class="small mb-1">
+                    <strong>Kecamatan:</strong>
+                    ${escapeHtml(report.kecamatan ?? '-')}
+                </p>
 
                 <p class="small mb-1">
 
