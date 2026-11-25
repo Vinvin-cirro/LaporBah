@@ -89,8 +89,8 @@ class ReportController extends Controller
         }
 
         return redirect()
-            ->route('reports.create')
-            ->with('success', 'Laporan berhasil dikirim.')
+            ->route('index')
+            ->with('success', 'Laporan berhasil dikirim!')
             ->with('tracking_code', $report->tracking_code);
     }
 

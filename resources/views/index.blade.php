@@ -269,8 +269,53 @@
     </div>
 </nav>
 
-<main class="container dashboard">
 
+
+<main class="container dashboard">
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm mb-4"
+            role="alert">
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+
+            <h6 class="fw-bold mb-2">
+                {{ session('success') }}
+            </h6>
+
+            <p class="mb-2">
+                Tracking Code laporan kamu:
+            </p>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <strong class="fs-5" id="trackingCode">
+                    {{ session('tracking_code') }}
+                </strong>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-success"
+                        onclick="copyTrackingCode()">
+                    <i class="bi bi-clipboard me-1"></i>
+                    Salin kode
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="copyTrackingLink()">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    Salin link
+                </button>
+            </div>
+
+            <small class="d-block mt-2">
+                Simpan kode atau link ini untuk memantau perkembangan laporan.
+            </small>
+
+        </div>
+    @endif
     <div class="mb-4">
         <!-- <h1 class="page-title">Beranda</h1> -->
 
@@ -523,6 +568,19 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+    function copyTrackingLink() {
+        const trackingCode = document.getElementById('trackingCode').innerText.trim();
+
+        const trackingUrl = `${window.location.origin}/reports/track/${trackingCode}`;
+
+        navigator.clipboard.writeText(trackingUrl)
+            .then(() => {
+                alert('Link pelacakan berhasil disalin!');
+            })
+            .catch(() => {
+                alert('Gagal menyalin link pelacakan.');
+            });
+    }
     // Pusat peta Kota Medan
     const map = L.map('securityMap').setView([3.5952, 98.6722], 12);
 
