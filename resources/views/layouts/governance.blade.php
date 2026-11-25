@@ -19,10 +19,16 @@
 
         .governance-sidebar {
             width: 250px;
+            min-width: 250px;
             min-height: 100vh;
+            height: 100vh;
             background: #020d32;
             color: white;
             flex-shrink: 0;
+
+            /* Membuat sidebar tetap di tempat saat halaman di-scroll */
+            position: sticky;
+            top: 0;
         }
 
         .sidebar-brand {
@@ -72,7 +78,10 @@
 
         .governance-main {
             min-width: 0;
+            min-height: 100vh;
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .governance-navbar {
@@ -82,6 +91,7 @@
         }
 
         .governance-content {
+            flex: 1;
             padding: 30px 32px;
         }
 
@@ -94,7 +104,8 @@
         @media (max-width: 768px) {
             .governance-sidebar {
                 width: 75px;
-            }
+                min-width: 75px;
+            }        
 
             .sidebar-brand {
                 padding: 20px 18px;
