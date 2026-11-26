@@ -20,6 +20,16 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
     <style>
+        .profile-avatar {
+            width: 38px;
+            height: 38px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
         body {
             background: #f5f7ff;
             color: #172441;
@@ -238,27 +248,67 @@
 
             <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
 
-                {{-- Tombol Lapor tetap tersedia untuk semua --}}
+                {{-- Tombol Lapor --}}
                 <a href="{{ route('reports.categories') }}" class="btn btn-outline-light">
                     + Lapor
                 </a>
 
                 @auth
-                    {{-- Jika sudah login --}}
-                    <span class="text-white">♧</span>
+                    <div class="dropdown">
+                        <button
+                            class="btn d-flex align-items-center gap-2 text-white border-0 dropdown-toggle profile-dropdown"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <img
+                                src="{{ asset('images/default-profile.png') }}"
+                                alt="Foto Profil"
+                                class="profile-avatar"
+                            >
 
-                    <span class="text-white">
-                        {{ auth()->user()->name }}
-                    </span>
-
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button class="btn btn-sm btn-outline-light">
-                            Keluar
+                            <span class="fw-semibold">
+                                {{ auth()->user()->name }}
+                            </span>
                         </button>
-                    </form>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('citizen.profile') }}">
+                                    <i class="bi bi-person me-2"></i>
+                                    Detail Profil
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-clock-history me-2"></i>
+                                    Aktivitas Saya
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-gear me-2"></i>
+                                    Pengaturan
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Keluar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
                 @else
-                    {{-- Jika belum login --}}
                     <a href="{{ route('login') }}" class="btn btn-md text-darkblue btn-kuning">
                         Login
                     </a>

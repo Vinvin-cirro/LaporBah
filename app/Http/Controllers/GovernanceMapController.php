@@ -67,6 +67,7 @@ class GovernanceMapController extends Controller
         $mapReports = $reports->map(function ($report) use ($clusterByReportId, $clusters) {
             $clusterId = $clusterByReportId[$report->id] ?? null;
             $cluster = $clusterId !== null ? ($clusters[$clusterId] ?? null) : null;
+            
 
             return [
                 'id' => $report->id,

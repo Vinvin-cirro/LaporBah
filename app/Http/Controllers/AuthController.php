@@ -81,7 +81,7 @@ class AuthController extends Controller
     private function redirectByRole(string $role)
     {
         return match ($role) {
-            'citizen' => redirect('/citizen/dashboard'),
+            'citizen' => redirect('/'),
             'officer' => redirect('/officer/dashboard'),
             'governance' => redirect('/governance/dashboard'),
             'superadmin' => redirect('/superadmin/dashboard'),

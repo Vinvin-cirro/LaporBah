@@ -15,6 +15,7 @@ use App\Http\Controllers\GovernanceStatisticsController;
 use App\Http\Controllers\OfficerReportController;
 use App\Http\Controllers\ReportAssignmentController;
 use App\Http\Controllers\GovernanceTeamController;
+use App\Http\Controllers\CitizenProfileController;
 
 
 // ==================================================
@@ -187,5 +188,27 @@ Route::middleware(['auth', 'role:superadmin'])
         Route::get('/dashboard', function () {
             return 'Superadmin Dashboard';
         })->name('dashboard');
+
+    });
+
+
+// ==================================================
+// CITIZEN ACCOUNT
+// ==================================================
+
+Route::middleware(['auth', 'role:citizen'])
+    ->prefix('citizen')
+    ->name('citizen.')
+    ->group(function () {
+
+        Route::get('/profile', [
+            CitizenProfileController::class,
+            'show'
+        ])->name('profile');
+
+        Route::put('/profile', [
+            CitizenProfileController::class,
+            'update'
+        ])->name('profile.update');
 
     });

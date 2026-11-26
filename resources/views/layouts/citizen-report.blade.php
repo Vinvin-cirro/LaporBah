@@ -5,18 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Buat Laporan') - LaporBah!</title>
+    <title>@yield('title', 'LaporBah!') - LaporBah!</title>
 
+    {{-- Bootstrap --}}
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     >
 
+    {{-- Bootstrap Icons --}}
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    {{-- Leaflet --}}
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
+    {{-- Favicon --}}
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
@@ -136,39 +145,84 @@
             border-color: #ffed91;
         }
 
-        .notification-icon {
-            color: #fff;
-            font-size: 20px;
-            line-height: 1;
-        }
-
-        .user-name {
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .btn-logout {
-            color: #fff;
-            background: transparent;
-            border: 1px solid #fff;
-            border-radius: 7px;
-            font-size: 12px;
-            padding: 6px 12px;
-        }
-
-        .btn-logout:hover {
-            color: var(--navy);
-            background: var(--yellow);
-            border-color: var(--yellow);
-        }
-
         .navbar-toggler {
             border-color: rgba(255, 255, 255, .5);
         }
 
         .navbar-toggler:focus {
             box-shadow: 0 0 0 .2rem rgba(255, 228, 92, .2);
+        }
+
+        /* =========================
+           PROFILE DROPDOWN
+        ========================= */
+
+        .profile-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #fff;
+            background: transparent;
+            border: 0;
+            border-radius: 10px;
+            padding: 5px 9px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .2s ease;
+        }
+
+        .profile-dropdown:hover,
+        .profile-dropdown:focus {
+            color: #fff;
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .profile-avatar {
+            width: 38px;
+            height: 38px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, .85);
+        }
+
+        .profile-dropdown::after {
+            margin-left: 3px;
+        }
+
+        .profile-menu {
+            min-width: 210px;
+            padding: 8px;
+            margin-top: 10px !important;
+            border: 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(2, 13, 50, .15);
+        }
+
+        .profile-menu .dropdown-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .profile-menu .dropdown-item:hover {
+            background: #f1f4fa;
+        }
+
+        .profile-menu .dropdown-divider {
+            margin: 6px 0;
+        }
+
+        .profile-menu .logout-item {
+            color: #dc3545;
+        }
+
+        .profile-menu .logout-item:hover {
+            background: #fff0f0;
+            color: #dc3545;
         }
 
         /* =========================
@@ -247,19 +301,27 @@
             .topbar .navbar-nav {
                 align-items: flex-start !important;
                 padding-top: 15px;
+                gap: 0 !important;
             }
 
             .topbar .nav-link {
                 padding: 9px 0;
             }
 
-            .topbar .navbar-nav {
-                gap: 0 !important;
+            .navbar-actions {
+                align-items: flex-start !important;
+                flex-direction: column;
+                flex-wrap: wrap;
+                gap: 12px !important;
+                padding-bottom: 12px;
             }
 
-            .navbar-actions {
-                flex-wrap: wrap;
-                padding-bottom: 12px;
+            .profile-dropdown {
+                padding-left: 0;
+            }
+
+            .profile-menu {
+                margin-top: 5px !important;
             }
         }
 
@@ -313,6 +375,7 @@
     <nav class="navbar navbar-expand-lg topbar">
         <div class="container">
 
+            {{-- BRAND --}}
             <div class="d-flex align-items-center">
                 <a href="{{ route('index') }}">
                     <img
@@ -328,6 +391,7 @@
                 </a>
             </div>
 
+            {{-- MOBILE TOGGLER --}}
             <button
                 class="navbar-toggler bg-light"
                 type="button"
@@ -340,9 +404,12 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            {{-- NAVBAR CONTENT --}}
             <div class="collapse navbar-collapse" id="mainNavbar">
 
+                {{-- NAVIGATION LINKS --}}
                 <div class="navbar-nav mx-auto gap-lg-4">
+
                     <a class="nav-link" href="{{ route('index') }}">
                         Beranda
                     </a>
@@ -358,11 +425,13 @@
                     <a class="nav-link" href="#">
                         Statistik
                     </a>
+
                 </div>
 
+                {{-- NAVBAR ACTIONS --}}
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0 navbar-actions">
 
-                    {{-- Tombol Lapor --}}
+                    {{-- TOMBOL LAPOR --}}
                     <a
                         href="{{ route('reports.categories') }}"
                         class="btn btn-report-nav"
@@ -371,30 +440,100 @@
                     </a>
 
                     @auth
-                        {{-- Pengguna yang sudah login --}}
-                        <span class="notification-icon" title="Notifikasi">
-                            ♧
-                        </span>
 
-                        <span class="user-name">
-                            {{ auth()->user()->name }}
-                        </span>
+                        @php
+                            $user = auth()->user();
 
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
+                            $profilePhoto = $user->profile_photo
+                                ? asset('storage/' . $user->profile_photo)
+                                : asset('images/default-profile.png');
+                        @endphp
 
-                            <button type="submit" class="btn btn-logout">
-                                Keluar
+                        {{-- PROFILE DROPDOWN --}}
+                        <div class="dropdown">
+
+                            <button
+                                class="profile-dropdown dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <img
+                                    src="{{ $profilePhoto }}"
+                                    alt="Foto Profil"
+                                    class="profile-avatar"
+                                >
+
+                                <span>{{ $user->name }}</span>
                             </button>
-                        </form>
+
+                            <ul class="dropdown-menu dropdown-menu-end profile-menu">
+
+                                {{-- DETAIL PROFIL --}}
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="{{ route('citizen.profile') }}"
+                                    >
+                                        <i class="bi bi-person me-2"></i>
+                                        Detail Profil
+                                    </a>
+                                </li>
+
+                                {{-- AKTIVITAS SAYA --}}
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                    >
+                                        <i class="bi bi-clock-history me-2"></i>
+                                        Aktivitas Saya
+                                    </a>
+                                </li>
+
+                                {{-- PENGATURAN --}}
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                    >
+                                        <i class="bi bi-gear me-2"></i>
+                                        Pengaturan
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+
+                                {{-- LOGOUT --}}
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST">
+                                        @csrf
+
+                                        <button
+                                            type="submit"
+                                            class="dropdown-item logout-item"
+                                        >
+                                            <i class="bi bi-box-arrow-right me-2"></i>
+                                            Keluar
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+                        </div>
+
                     @else
-                        {{-- Pengguna guest --}}
+
+                        {{-- GUEST LOGIN --}}
                         <a
                             href="{{ route('login') }}"
                             class="btn btn-login-nav"
                         >
                             Login
                         </a>
+
                     @endauth
 
                 </div>
@@ -433,6 +572,7 @@
         </div>
     </footer>
 
+    {{-- JAVASCRIPT --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
